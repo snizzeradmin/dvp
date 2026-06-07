@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.json">
+    <title>DrugVerify NG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --green-dark: #14532d;
+            --red: #dc2626;
+            --red-light: #fee2e2;
+            --amber: #d97706;
+            --amber-light: #fef3c7;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --white: #ffffff;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --font: 'DM Sans', sans-serif;
+            --mono: 'DM Mono', monospace;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--gray-100);
+            color: var(--gray-900);
+            font-size: 15px;
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        #app {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            position: absolute;
+            inset: 0;
+            bottom: 64px;
+            background: var(--white);
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .screen-body {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px 10px;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-100);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .topbar-sub {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 1px;
+        }
+
+        .topbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--green);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-mark svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: white;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        #bottom-nav {
+            height: 64px;
+            background: var(--white);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            align-items: stretch;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: var(--font);
+            color: var(--gray-400);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 8px 4px;
+            transition: color 0.15s;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--green);
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 8px;
+            right: calc(50% - 14px);
+            background: var(--red);
+            color: white;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 1px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .card+.card {
+            margin-top: 12px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--gray-400);
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 100px;
+        }
+
+        .badge-green {
+            background: var(--green-light);
+            color: var(--green-dark);
+        }
+
+        .badge-red {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .badge-amber {
+            background: var(--amber-light);
+            color: var(--amber);
+        }
+
+        .badge-gray {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .badge-blue {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 500;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .btn:active {
+            opacity: 0.85;
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--green);
+            border: 1.5px solid var(--green);
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: var(--gray-400);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+        }
+
+        input[type=text],
+        input[type=search],
+        select,
+        textarea {
+            width: 100%;
+            font-family: var(--font);
+            font-size: 15px;
+            padding: 11px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            color: var(--gray-900);
+            outline: none;
+            transition: border-color 0.15s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input[type=text]:focus,
+        input[type=search]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--green);
+        }
+
+        .has-icon input,
+        .has-icon select {
+            padding-left: 40px;
+        }
+
+        textarea {
+            resize: none;
+            line-height: 1.6;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--gray-100);
+            margin: 8px 0;
+        }
+
+        .list-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+        }
+
+        .list-row:last-child {
+            border-bottom: none;
+        }
+
+        .list-row-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .list-row-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .list-row-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .list-row-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .list-row-sub {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 1px;
+        }
+
+        .list-row-end {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .chevron {
+            width: 16px;
+            height: 16px;
+            stroke: var(--gray-300);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 14px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--gray-500);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        #scan-screen .screen-body {
+            background: var(--gray-50);
+        }
+
+        .scanner-wrap {
+            margin: 20px;
+            background: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .scanner-viewfinder {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--gray-900);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .scanner-corners {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            pointer-events: none;
+        }
+
+        .scanner-corners::before,
+        .scanner-corners::after,
+        .sc-inner::before,
+        .sc-inner::after {
+            content: '';
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-color: white;
+            border-style: solid;
+        }
+
+        .scanner-corners::before {
+            top: 0;
+            left: 0;
+            border-width: 3px 0 0 3px;
+            border-radius: 3px 0 0 0;
+        }
+
+        .scanner-corners::after {
+            top: 0;
+            right: 0;
+            border-width: 3px 3px 0 0;
+            border-radius: 0 3px 0 0;
+        }
+
+        .sc-inner::before {
+            bottom: 0;
+            left: 0;
+            border-width: 0 0 3px 3px;
+            border-radius: 0 0 0 3px;
+        }
+
+        .sc-inner::after {
+            bottom: 0;
+            right: 0;
+            border-width: 0 3px 3px 0;
+            border-radius: 0 0 3px 0;
+        }
+
+        .scan-line {
+            position: absolute;
+            left: calc(50% - 90px);
+            width: 180px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #16a34a, transparent);
+            animation: scanline 2s ease-in-out infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                top: calc(50% - 90px);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: calc(50% + 90px);
+                opacity: 0;
+            }
+        }
+
+        .scanner-status {
+            position: absolute;
+            bottom: 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .scanner-actions {
+            padding: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .scanner-actions .btn {
+            font-size: 14px;
+            padding: 10px 16px;
+        }
+
+        .manual-section {
+            padding: 0 20px 20px;
+        }
+
+        #database-screen .screen-body {
+            background: var(--gray-50);
+        }
+
+        .search-bar {
+            padding: 14px 20px 10px;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 20px 12px;
+            scrollbar-width: none;
+        }
+
+        .filter-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1.5px solid var(--gray-200);
+            background: var(--white);
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+        }
+
+        .db-list {
+            padding: 0 16px 20px;
+        }
+
+        #report-screen .screen-body {
+            background: var(--gray-50);
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 4px;
+        }
+
+        #analytics-screen .screen-body {
+            background: var(--gray-50);
+        }
+
+        .analytics-body {
+            padding: 16px 20px 20px;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: var(--gray-600);
+            width: 80px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            background: var(--gray-100);
+            border-radius: 4px;
+            height: 20px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            min-width: 20px;
+            transition: width 1s ease;
+        }
+
+        .bar-fill.green {
+            background: var(--green);
+        }
+
+        .bar-fill.red {
+            background: var(--red);
+        }
+
+        .bar-fill.amber {
+            background: var(--amber);
+        }
+
+        .map-placeholder {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--gray-400);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-dots {
+            position: absolute;
+            inset: 0;
+        }
+
+        .map-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .sheet-overlay {
+            position: absolute;
+            inset: 0;
+            bottom: 64px;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+        }
+
+        .sheet-overlay.open {
+            display: flex;
+        }
+
+        .sheet {
+            background: var(--white);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-height: 90%;
+            overflow-y: auto;
+            padding-bottom: env(safe-area-inset-bottom);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: 2px;
+            margin: 12px auto 0;
+        }
+
+        .sheet-header {
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .sheet-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .sheet-body {
+            padding: 20px;
+        }
+
+        .sheet-close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            width: 28px;
+            height: 28px;
+            background: var(--gray-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .sheet-close svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--gray-500);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        .result-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .result-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .result-icon.authentic {
+            background: var(--green);
+        }
+
+        .result-icon.fake {
+            background: var(--red);
+        }
+
+        .result-icon.unknown {
+            background: var(--amber);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-key {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        .detail-val {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-900);
+            text-align: right;
+            max-width: 60%;
+        }
+
+        #home-screen .screen-body {
+            background: var(--gray-50);
+        }
+
+        .home-hero {
+            background: var(--green);
+            padding: 20px;
+            color: white;
+        }
+
+        .home-hero-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .home-hero-sub {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-top: 3px;
+        }
+
+        .home-hero-stat {
+            margin-top: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero-stat-num {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .hero-stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .home-content {
+            padding: 16px 20px 20px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quick-action {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            transition: transform 0.1s;
+        }
+
+        .quick-action:active {
+            transform: scale(0.97);
+        }
+
+        .qa-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qa-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .qa-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .qa-sub {
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-top: 1px;
+        }
+
+        .recent-section {
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--gray-400);
+            font-size: 14px;
+        }
+
+        .empty-state svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--gray-300);
+            fill: none;
+            stroke-width: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .toast {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            background: var(--gray-900);
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            z-index: 500;
+            display: none;
+            animation: fadeInUp 0.25s ease;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mono {
+            font-family: var(--mono);
+            font-size: 13px;
+        }
+
+        .scan-pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gray-300);
+        }
+
+        .dot.active {
+            background: var(--green);
+        }
+
+        .tab-row {
+            display: flex;
+            background: var(--gray-100);
+            border-radius: 10px;
+            padding: 3px;
+            margin: 0 20px 14px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 7px;
+            border-radius: 8px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--gray-500);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--white);
+            color: var(--gray-900);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 30px;
+            text-align: center;
+            gap: 14px;
+        }
+
+        .success-circle {
+            width: 72px;
+            height: 72px;
+            background: var(--green-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-circle svg {
+            width: 36px;
+            height: 36px;
+            stroke: var(--green);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .info-banner {
+            background: var(--blue-light);
+            border: 1px solid #bfdbfe;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--blue);
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .info-banner svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--blue);
+            fill: none;
+            stroke-width: 2;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="screen active" id="home-screen">
+            <div class="topbar">
+                <div class="topbar-logo">
+                    <div class="logo-mark">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4" />
+                            <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" /></svg>
+                    </div>
+                    <div>
+                        <div class="topbar-title">DrugVerify NG</div>
+                        <div class="topbar-sub">NAFDAC Integrated</div>
+                    </div>
+                </div>
+                <div class="badge badge-green">Live</div>
+            </div>
+            <div class="screen-body">
+                <div class="home-hero">
+                    <div class="home-hero-title">Verify Before You Take</div>
+                    <div class="home-hero-sub">Scan any drug to check NAFDAC authenticity</div>
+                    <div class="home-hero-stat">
+                        <div>
+                            <div class="hero-stat-num" id="hero-count">14,892</div>
+                            <div class="hero-stat-label">Drugs in Registry</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div class="hero-stat-num" style="font-size:18px" id="hero-scans">3,241</div>
+                            <div class="hero-stat-label">Scans Today</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="home-content">
+                    <div class="quick-actions">
+                        <div class="quick-action" onclick="navigate('scan')">
+                            <div class="qa-icon" style="background:#dcfce7; color:#16a34a">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                                    <circle cx="17.5" cy="17.5" r="2.5" />
+                                    <path d="M14 14h3" />
+                                    <path d="M14 20h7" /></svg>
+                            </div>
+                            <div>
+                                <div class="qa-label">Scan Drug</div>
+                                <div class="qa-sub">Use camera</div>
+                            </div>
+                        </div>
+                        <div class="quick-action" onclick="navigate('database')">
+                            <div class="qa-icon" style="background:#eff6ff; color:#2563eb">
+                                <svg viewBox="0 0 24 24">
+                                    <ellipse cx="12" cy="5" rx="9" ry="3" />
+                                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                                    <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" /></svg>
+                            </div>
+                            <div>
+                                <div class="qa-label">Drug Database</div>
+                                <div class="qa-sub">Search registry</div>
+                            </div>
+                        </div>
+                        <div class="quick-action" onclick="navigate('report')">
+                            <div class="qa-icon" style="background:#fee2e2; color:#dc2626">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                            </div>
+                            <div>
+                                <div class="qa-label">Report Fake</div>
+                                <div class="qa-sub">Alert NAFDAC</div>
+                            </div>
+                        </div>
+                        <div class="quick-action" onclick="navigate('analytics')">
+                            <div class="qa-icon" style="background:#fef3c7; color:#d97706">
+                                <svg viewBox="0 0 24 24">
+                                    <line x1="18" y1="20" x2="18" y2="10" />
+                                    <line x1="12" y1="20" x2="12" y2="4" />
+                                    <line x1="6" y1="20" x2="6" y2="14" /></svg>
+                            </div>
+                            <div>
+                                <div class="qa-label">Analytics</div>
+                                <div class="qa-sub">NAFDAC data</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-section">
+                        <div class="section-label">Recent Verifications</div>
+                        <div class="card" id="recent-list">
+                            <div class="list-row" onclick="showResultSheet('authentic', 'Lonart DS', 'A7-9812-LMC')">
+                                <div class="list-row-icon" style="background:#dcfce7; color:#16a34a">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M20 6L9 17l-5-5" /></svg>
+                                </div>
+                                <div class="list-row-body">
+                                    <div class="list-row-title">Lonart DS Tablets</div>
+                                    <div class="list-row-sub">NAFDAC A7-9812-LMC · 2m ago</div>
+                                </div>
+                                <div class="list-row-end">
+                                    <div class="badge badge-green">Genuine</div>
+                                </div>
+                            </div>
+                            <div class="list-row" onclick="showResultSheet('fake', 'Amoxil 500mg', 'B3-0041-FKE')">
+                                <div class="list-row-icon" style="background:#fee2e2; color:#dc2626">
+                                    <svg viewBox="0 0 24 24">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" /></svg>
+                                </div>
+                                <div class="list-row-body">
+                                    <div class="list-row-title">Amoxil 500mg Caps</div>
+                                    <div class="list-row-sub">Scanned code · 1h ago</div>
+                                </div>
+                                <div class="list-row-end">
+                                    <div class="badge badge-red">Fake</div>
+                                </div>
+                            </div>
+                            <div class="list-row"
+                                onclick="showResultSheet('authentic', 'Augmentin 625', 'C1-3309-GSK')">
+                                <div class="list-row-icon" style="background:#dcfce7; color:#16a34a">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M20 6L9 17l-5-5" /></svg>
+                                </div>
+                                <div class="list-row-body">
+                                    <div class="list-row-title">Augmentin 625mg</div>
+                                    <div class="list-row-sub">NAFDAC C1-3309-GSK · 3h ago</div>
+                                </div>
+                                <div class="list-row-end">
+                                    <div class="badge badge-green">Genuine</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="scan-screen">
+            <div class="topbar">
+                <div>
+                    <div class="topbar-title">Verify Drug</div>
+                    <div class="topbar-sub">Scan or enter code</div>
+                </div>
+            </div>
+            <div class="screen-body">
+                <div class="scanner-wrap">
+                    <div class="scanner-viewfinder" id="viewfinder">
+                        <div class="scanner-corners">
+                            <div class="sc-inner"></div>
+                        </div>
+                        <div class="scan-line" id="scan-line"></div>
+                        <div class="scanner-status scan-pulse" id="scanner-status">Align QR code within frame</div>
+                    </div>
+                    <div class="scanner-actions">
+                        <button class="btn btn-primary" onclick="simulateScan()" style="flex:1">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                                stroke-linecap="round">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                                <circle cx="17.5" cy="17.5" r="2.5" /></svg>
+                            Simulate Scan
+                        </button>
+                        <button class="btn btn-secondary" onclick="simulateFakeScan()" style="flex:1">
+                            Scan Fake
+                        </button>
+                    </div>
+                </div>
+
+                <div class="manual-section">
+                    <div class="section-label">Manual Entry</div>
+                    <div class="info-banner">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        Enter the NAFDAC registration number printed on the drug packaging
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">NAFDAC Registration Number</label>
+                        <div class="input-wrap has-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" /></svg>
+                            <input type="text" id="manual-input" placeholder="e.g. A7-9812-LMC"
+                                style="font-family:var(--mono);letter-spacing:0.04em" maxlength="20">
+                        </div>
+                        <div class="form-hint">Format: XX-NNNN-ABC</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="manualVerify()">Verify Drug</button>
+
+                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--gray-100)">
+                        <div class="section-label">Try Demo Codes</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+                            <button class="btn btn-secondary" onclick="fillDemo('A7-9812-LMC')"
+                                style="font-family:var(--mono);font-size:13px;letter-spacing:0.04em;justify-content:flex-start">A7-9812-LMC
+                                — Lonart DS (Genuine)</button>
+                            <button class="btn btn-secondary" onclick="fillDemo('C1-3309-GSK')"
+                                style="font-family:var(--mono);font-size:13px;letter-spacing:0.04em;justify-content:flex-start">C1-3309-GSK
+                                — Augmentin 625mg (Genuine)</button>
+                            <button class="btn btn-secondary" onclick="fillDemo('B3-0041-FKE')"
+                                style="font-family:var(--mono);font-size:13px;letter-spacing:0.04em;justify-content:flex-start">B3-0041-FKE
+                                — Unknown (Fake)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="database-screen">
+            <div class="topbar">
+                <div>
+                    <div class="topbar-title">Drug Registry</div>
+                    <div class="topbar-sub">NAFDAC Registered</div>
+                </div>
+                <div class="badge badge-blue" style="font-size:11px">14,892</div>
+            </div>
+            <div class="screen-body">
+                <div class="search-bar">
+                    <div class="input-wrap has-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                        <input type="search" id="db-search" placeholder="Search drug name or NAFDAC no."
+                            oninput="filterDrugs()">
+                    </div>
+                </div>
+                <div class="filter-row" id="filter-row">
+                    <div class="filter-chip active" onclick="setFilter('all', this)">All</div>
+                    <div class="filter-chip" onclick="setFilter('antimalarial', this)">Antimalarial</div>
+                    <div class="filter-chip" onclick="setFilter('antibiotic', this)">Antibiotic</div>
+                    <div class="filter-chip" onclick="setFilter('antihypertensive', this)">Antihypertensive</div>
+                    <div class="filter-chip" onclick="setFilter('antiretroviral', this)">Antiretroviral</div>
+                    <div class="filter-chip" onclick="setFilter('analgesic', this)">Analgesic</div>
+                </div>
+                <div class="db-list" id="db-list"></div>
+            </div>
+        </div>
+
+        <div class="screen" id="report-screen">
+            <div class="topbar">
+                <div>
+                    <div class="topbar-title">Report Fake Drug</div>
+                    <div class="topbar-sub">Alert NAFDAC directly</div>
+                </div>
+            </div>
+            <div class="screen-body">
+                <div id="report-form-wrap">
+                    <div class="form-section">
+                        <div class="info-banner">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                            Reports are sent directly to NAFDAC and are handled confidentially. Your identity is
+                            protected.
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Drug Name *</label>
+                            <div class="input-wrap has-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                                    </svg>
+                                <input type="text" id="rep-drug-name" placeholder="e.g. Lonart DS Tablets">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">NAFDAC Number (if visible)</label>
+                            <div class="input-wrap has-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                                    <rect x="3" y="14" width="7" height="7" rx="1" /></svg>
+                                <input type="text" id="rep-nafdac" placeholder="e.g. A7-9812-LMC"
+                                    style="font-family:var(--mono)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Where did you buy it? *</label>
+                            <div class="input-wrap has-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" /></svg>
+                                <select id="rep-location">
+                                    <option value="">Select location type</option>
+                                    <option>Open market / roadside</option>
+                                    <option>Patent medicine store (PMV)</option>
+                                    <option>Licensed pharmacy</option>
+                                    <option>Hospital pharmacy</option>
+                                    <option>Online / social media</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">City / Area *</label>
+                            <div class="input-wrap has-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                    <path
+                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                    </svg>
+                                <input type="text" id="rep-city" placeholder="e.g. Lagos, Kano, Abuja">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Why do you suspect it's fake?</label>
+                            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px"
+                                id="suspicion-checks">
+                                <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer">
+                                    <input type="checkbox" value="packaging"> Packaging looks different / poor quality
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer">
+                                    <input type="checkbox" value="smell"> Unusual smell or colour
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer">
+                                    <input type="checkbox" value="price"> Price suspiciously low
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer">
+                                    <input type="checkbox" value="noeffect"> No effect after taking
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer">
+                                    <input type="checkbox" value="scan"> Scan returned counterfeit alert
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Additional Details</label>
+                            <textarea id="rep-details" rows="3"
+                                placeholder="Any other information that may help NAFDAC..."></textarea>
+                        </div>
+
+                        <button class="btn btn-danger" onclick="submitReport()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                                stroke-linecap="round">
+                                <path
+                                    d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                <line x1="12" y1="9" x2="12" y2="13" /></svg>
+                            Submit Report to NAFDAC
+                        </button>
+                    </div>
+                </div>
+                <div id="report-success" style="display:none">
+                    <div class="success-screen">
+                        <div class="success-circle">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M20 6L9 17l-5-5" /></svg>
+                        </div>
+                        <div style="font-size:18px;font-weight:600;color:var(--gray-900)">Report Submitted</div>
+                        <div style="font-size:14px;color:var(--gray-500);line-height:1.6">Your report has been sent to
+                            NAFDAC. Reference number: <span class="mono" style="color:var(--green)"
+                                id="report-ref"></span></div>
+                        <div style="margin-top:8px;font-size:13px;color:var(--gray-400)">NAFDAC will investigate within
+                            48–72 hours</div>
+                        <button class="btn btn-primary" style="margin-top:16px;max-width:200px"
+                            onclick="resetReport()">Report Another</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="analytics-screen">
+            <div class="topbar">
+                <div>
+                    <div class="topbar-title">Analytics</div>
+                    <div class="topbar-sub">NAFDAC Intelligence Dashboard</div>
+                </div>
+            </div>
+            <div class="screen-body">
+                <div class="analytics-body">
+                    <div class="stat-grid" style="margin-bottom:16px">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Scans</div>
+                            <div class="stat-value">47,312</div>
+                            <div class="stat-sub">↑ 12% this week</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Fakes Caught</div>
+                            <div class="stat-value" style="color:var(--red)">1,842</div>
+                            <div class="stat-sub">3.9% of scans</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Reports Filed</div>
+                            <div class="stat-value">284</div>
+                            <div class="stat-sub">This month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Drugs in DB</div>
+                            <div class="stat-value">14,892</div>
+                            <div class="stat-sub">Active registrations</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom:16px">
+                        <div class="section-label">Counterfeit by Category</div>
+                        <div class="bar-chart">
+                            <div class="bar-row">
+                                <div class="bar-label">Antimalarial</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill red" style="width:68%">68%</div>
+                                </div>
+                            </div>
+                            <div class="bar-row">
+                                <div class="bar-label">Antibiotic</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill red" style="width:42%">42%</div>
+                                </div>
+                            </div>
+                            <div class="bar-row">
+                                <div class="bar-label">ARV</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill amber" style="width:18%">18%</div>
+                                </div>
+                            </div>
+                            <div class="bar-row">
+                                <div class="bar-label">Analgesic</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill amber" style="width:12%">12%</div>
+                                </div>
+                            </div>
+                            <div class="bar-row">
+                                <div class="bar-label">Antihypert.</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill green" style="width:7%">7%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-bottom:16px">
+                        <div class="section-label">Incident Hotspots</div>
+                        <div class="map-placeholder" style="margin-top:10px">
+                            <div class="map-dots" id="map-dots"></div>
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)"
+                                stroke-width="1.5" stroke-linecap="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" /></svg>
+                            <div style="font-size:12px">Nigeria Counterfeit Hotspot Map</div>
+                        </div>
+                        <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+                            <div class="list-row" style="padding:8px 0">
+                                <div style="flex:1;font-size:13px;font-weight:500">Lagos State</div>
+                                <div class="badge badge-red">High Risk</div>
+                            </div>
+                            <div class="list-row" style="padding:8px 0">
+                                <div style="flex:1;font-size:13px;font-weight:500">Kano State</div>
+                                <div class="badge badge-amber">Medium</div>
+                            </div>
+                            <div class="list-row" style="padding:8px 0">
+                                <div style="flex:1;font-size:13px;font-weight:500">Rivers State</div>
+                                <div class="badge badge-amber">Medium</div>
+                            </div>
+                            <div class="list-row" style="padding:8px 0;border-bottom:none">
+                                <div style="flex:1;font-size:13px;font-weight:500">Abuja FCT</div>
+                                <div class="badge badge-green">Low</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-label">Weekly Scan Volume</div>
+                        <div style="display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:12px"
+                            id="sparkline"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav id="bottom-nav">
+            <button class="nav-item active" id="nav-home" onclick="navigate('home')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" /></svg>
+                Home
+            </button>
+            <button class="nav-item" id="nav-scan" onclick="navigate('scan')">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <circle cx="17.5" cy="17.5" r="2.5" /></svg>
+                Scan
+            </button>
+            <button class="nav-item" id="nav-database" onclick="navigate('database')">
+                <svg viewBox="0 0 24 24">
+                    <ellipse cx="12" cy="5" rx="9" ry="3" />
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                    <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" /></svg>
+                Registry
+            </button>
+            <button class="nav-item" id="nav-report" onclick="navigate('report')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                Report
+                <span class="nav-badge" id="report-badge" style="display:none">!</span>
+            </button>
+            <button class="nav-item" id="nav-analytics" onclick="navigate('analytics')">
+                <svg viewBox="0 0 24 24">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" /></svg>
+                Analytics
+            </button>
+        </nav>
+
+        <div class="sheet-overlay" id="result-overlay" onclick="closeSheet(event)">
+            <div class="sheet" id="result-sheet">
+                <div class="sheet-handle"></div>
+                <div style="position:relative">
+                    <button class="sheet-close" onclick="closeResultSheet()">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                </div>
+                <div class="sheet-body" id="result-body"></div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+    </div>
+
+    <script>
+        const DRUGS = [{
+                id: 'A7-9812-LMC',
+                name: 'Lonart DS Tablets',
+                manufacturer: 'Bliss GVS Pharma Ltd',
+                category: 'antimalarial',
+                api: 'Artemether + Lumefantrine',
+                strength: '80mg/480mg',
+                form: 'Tablet',
+                expiry: '2026-08',
+                status: 'active',
+                manufactured: 'Nigeria',
+                approved: '2019-03-15'
+            },
+            {
+                id: 'C1-3309-GSK',
+                name: 'Augmentin 625mg',
+                manufacturer: 'GlaxoSmithKline Nigeria',
+                category: 'antibiotic',
+                api: 'Amoxicillin + Clavulanate',
+                strength: '500mg/125mg',
+                form: 'Tablet',
+                expiry: '2025-11',
+                status: 'active',
+                manufactured: 'UK',
+                approved: '2015-07-22'
+            },
+            {
+                id: 'D2-4401-EMZ',
+                name: 'Emzor Paracetamol 500mg',
+                manufacturer: 'Emzor Pharmaceutical Ltd',
+                category: 'analgesic',
+                api: 'Paracetamol',
+                strength: '500mg',
+                form: 'Tablet',
+                expiry: '2026-02',
+                status: 'active',
+                manufactured: 'Nigeria',
+                approved: '2018-01-10'
+            },
+            {
+                id: 'E5-7723-NFT',
+                name: 'Coartem 20/120mg',
+                manufacturer: 'Novartis (Pty) Ltd',
+                category: 'antimalarial',
+                api: 'Artemether + Lumefantrine',
+                strength: '20mg/120mg',
+                form: 'Tablet',
+                expiry: '2025-09',
+                status: 'active',
+                manufactured: 'South Africa',
+                approved: '2016-06-01'
+            },
+            {
+                id: 'F3-8812-MYL',
+                name: 'Lamivudine 150mg',
+                manufacturer: 'Mylan Laboratories Ltd',
+                category: 'antiretroviral',
+                api: 'Lamivudine',
+                strength: '150mg',
+                form: 'Tablet',
+                expiry: '2027-01',
+                status: 'active',
+                manufactured: 'India',
+                approved: '2020-11-18'
+            },
+            {
+                id: 'G9-1100-SKL',
+                name: 'Amlodipine 5mg',
+                manufacturer: 'Skilarence Pharma',
+                category: 'antihypertensive',
+                api: 'Amlodipine besylate',
+                strength: '5mg',
+                form: 'Tablet',
+                expiry: '2026-06',
+                status: 'active',
+                manufactured: 'Nigeria',
+                approved: '2021-04-30'
+            },
+            {
+                id: 'H1-2209-NPL',
+                name: 'Ampiclox 500mg',
+                manufacturer: 'Beecham Nigeria Plc',
+                category: 'antibiotic',
+                api: 'Ampicillin + Cloxacillin',
+                strength: '250mg/250mg',
+                form: 'Capsule',
+                expiry: '2025-12',
+                status: 'active',
+                manufactured: 'Nigeria',
+                approved: '2017-09-12'
+            },
+            {
+                id: 'J4-5531-BNP',
+                name: 'Tenofovir 300mg',
+                manufacturer: 'Cipla Ltd',
+                category: 'antiretroviral',
+                api: 'Tenofovir disoproxil',
+                strength: '300mg',
+                form: 'Tablet',
+                expiry: '2027-05',
+                status: 'active',
+                manufactured: 'India',
+                approved: '2019-08-20'
+            },
+            {
+                id: 'K2-6612-GLD',
+                name: 'Lisinopril 10mg',
+                manufacturer: 'Golden Cross Pharma',
+                category: 'antihypertensive',
+                api: 'Lisinopril',
+                strength: '10mg',
+                form: 'Tablet',
+                expiry: '2026-10',
+                status: 'active',
+                manufactured: 'Nigeria',
+                approved: '2020-03-07'
+            },
+            {
+                id: 'L8-3390-ART',
+                name: 'Artesunate Injection',
+                manufacturer: 'Guilin Pharma',
+                category: 'antimalarial',
+                api: 'Artesunate',
+                strength: '60mg/vial',
+                form: 'Injection',
+                expiry: '2025-08',
+                status: 'active',
+                manufactured: 'China',
+                approved: '2018-12-14'
+            },
+            {
+                id: 'M3-7741-IBU',
+                name: 'Ibuprofen 400mg',
+                manufacturer: 'Emzor Pharmaceutical Ltd',
+                category: 'analgesic',
+                api: 'Ibuprofen',
+                strength: '400mg',
+                form: 'Tablet',
+                expiry: '2026-04',
+                status: 'active',
+                manufactured: 'Nigeria',
+                approved: '2016-02-28'
+            },
+            {
+                id: 'N6-8823-CIP',
+                name: 'Ciprofloxacin 500mg',
+                manufacturer: 'Fidson Healthcare Plc',
+                category: 'antibiotic',
+                api: 'Ciprofloxacin HCl',
+                strength: '500mg',
+                form: 'Tablet',
+                expiry: '2026-01',
+                status: 'suspended',
+                manufactured: 'Nigeria',
+                approved: '2017-05-15'
+            },
+        ];
+
+        let currentFilter = 'all';
+        let recentScans = JSON.parse(localStorage.getItem('recentScans') || '[]');
+        let reportCount = parseInt(localStorage.getItem('reportCount') || '0');
+
+        function navigate(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(screen + '-screen').classList.add('active');
+            document.getElementById('nav-' + screen).classList.add('active');
+            if (screen === 'database') renderDrugList(DRUGS);
+            if (screen === 'analytics') renderSparkline();
+        }
+
+        function simulateScan() {
+            const genuine = DRUGS[Math.floor(Math.random() * DRUGS.length)];
+            showScanningAnimation(() => showResultSheet('authentic', genuine.name, genuine.id));
+        }
+
+        function simulateFakeScan() {
+            showScanningAnimation(() => showResultSheet('fake', 'Unknown Drug', 'B3-0041-FKE'));
+        }
+
+        function showScanningAnimation(callback) {
+            const status = document.getElementById('scanner-status');
+            const line = document.getElementById('scan-line');
+            status.textContent = 'Scanning...';
+            line.style.animationDuration = '0.4s';
+            setTimeout(() => {
+                status.textContent = 'Verifying with NAFDAC...';
+                setTimeout(() => {
+                    line.style.animationDuration = '2s';
+                    status.textContent = 'Align QR code within frame';
+                    callback();
+                }, 800);
+            }, 600);
+        }
+
+        function fillDemo(code) {
+            document.getElementById('manual-input').value = code;
+            showToast('Code filled — tap Verify Drug');
+        }
+
+        function manualVerify() {
+            const val = document.getElementById('manual-input').value.trim().toUpperCase();
+            if (!val) {
+                showToast('Please enter a NAFDAC number');
+                return;
+            }
+            const drug = DRUGS.find(d => d.id === val);
+            if (drug) {
+                showResultSheet(drug.status === 'suspended' ? 'unknown' : 'authentic', drug.name, drug.id);
+            } else {
+                showResultSheet('fake', 'Unknown Drug', val);
+            }
+        }
+
+        function showResultSheet(type, name, nafdacId) {
+            const drug = DRUGS.find(d => d.id === nafdacId);
+            const overlay = document.getElementById('result-overlay');
+            const body = document.getElementById('result-body');
+
+            const scan = {
+                type,
+                name,
+                nafdacId,
+                time: Date.now()
+            };
+            recentScans.unshift(scan);
+            recentScans = recentScans.slice(0, 10);
+            try {
+                localStorage.setItem('recentScans', JSON.stringify(recentScans));
+            } catch (e) {}
+
+            let iconHtml, statusBadge, statusMsg;
+            if (type === 'authentic') {
+                iconHtml =
+                    `<div class="result-icon authentic"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>`;
+                statusBadge =
+                    `<div class="badge badge-green" style="font-size:14px;padding:6px 16px">✓ Genuine Drug</div>`;
+                statusMsg =
+                    `<p style="font-size:13px;color:var(--gray-500);margin-top:8px">This drug is registered with NAFDAC and cryptographically verified as authentic.</p>`;
+            } else if (type === 'fake') {
+                iconHtml =
+                    `<div class="result-icon fake"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>`;
+                statusBadge =
+                    `<div class="badge badge-red" style="font-size:14px;padding:6px 16px">⚠ Counterfeit Alert</div>`;
+                statusMsg =
+                    `<p style="font-size:13px;color:var(--red);margin-top:8px;font-weight:500">DO NOT take this drug. The code does not match any NAFDAC record. This may be a counterfeit product.</p>`;
+            } else {
+                iconHtml =
+                    `<div class="result-icon unknown"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>`;
+                statusBadge =
+                `<div class="badge badge-amber" style="font-size:14px;padding:6px 16px">⚠ Suspended</div>`;
+                statusMsg =
+                    `<p style="font-size:13px;color:var(--amber);margin-top:8px">This drug registration has been suspended by NAFDAC. Consult a pharmacist.</p>`;
+            }
+
+            let detailsHtml = '';
+            if (drug) {
+                detailsHtml = `
+      <div style="margin-top:20px">
+        <div class="section-label">Drug Information</div>
+        <div class="card" style="margin-top:8px">
+          <div class="detail-row"><span class="detail-key">NAFDAC No.</span><span class="detail-val mono">${drug.id}</span></div>
+          <div class="detail-row"><span class="detail-key">Manufacturer</span><span class="detail-val">${drug.manufacturer}</span></div>
+          <div class="detail-row"><span class="detail-key">Active Ingredient</span><span class="detail-val">${drug.api}</span></div>
+          <div class="detail-row"><span class="detail-key">Strength</span><span class="detail-val">${drug.strength}</span></div>
+          <div class="detail-row"><span class="detail-key">Form</span><span class="detail-val">${drug.form}</span></div>
+          <div class="detail-row"><span class="detail-key">Made in</span><span class="detail-val">${drug.manufactured}</span></div>
+          <div class="detail-row" style="border:none"><span class="detail-key">Expiry</span><span class="detail-val">${drug.expiry}</span></div>
+        </div>
+      </div>`;
+            } else {
+                detailsHtml = `
+      <div style="margin-top:20px">
+        <div class="card" style="background:var(--red-light);border-color:#fca5a5">
+          <div style="font-size:13px;color:var(--red);line-height:1.6">The scanned code <span class="mono">${nafdacId}</span> is not in the NAFDAC database. Do not take this medication. Report it below.</div>
+        </div>
+      </div>`;
+            }
+
+            body.innerHTML = `
+    <div style="text-align:center;padding:8px 0 16px">
+      ${iconHtml}
+      <div style="font-size:17px;font-weight:600;margin-bottom:10px">${name}</div>
+      ${statusBadge}
+      ${statusMsg}
+    </div>
+    ${detailsHtml}
+    ${type === 'fake' || type === 'unknown' ? `<button class="btn btn-danger" style="margin-top:16px" onclick="closeResultSheet();navigate('report')">Report This Drug</button>` : ''}
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--gray-400)">Scan ID: ${Math.random().toString(36).slice(2,10).toUpperCase()} · ${new Date().toLocaleTimeString()}</div>
+  `;
+
+            overlay.classList.add('open');
+        }
+
+        function closeResultSheet() {
+            document.getElementById('result-overlay').classList.remove('open');
+        }
+
+        function closeSheet(e) {
+            if (e.target === document.getElementById('result-overlay')) closeResultSheet();
+        }
+
+        function renderDrugList(drugs) {
+            const list = document.getElementById('db-list');
+            if (!drugs.length) {
+                list.innerHTML =
+                    `<div class="empty-state"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div>No drugs found</div></div>`;
+                return;
+            }
+            list.innerHTML = `<div class="card" style="padding:0;overflow:hidden">` +
+                drugs.map(d => `
+      <div class="list-row" style="padding:13px 16px" onclick="showDrugDetail('${d.id}')">
+        <div class="list-row-icon" style="background:${catColor(d.category)};color:${catColorText(d.category)}">
+          <svg viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <div class="list-row-body">
+          <div class="list-row-title">${d.name}</div>
+          <div class="list-row-sub">${d.id} · ${d.manufacturer.split(' ').slice(0,2).join(' ')}</div>
+        </div>
+        <div class="list-row-end">
+          <div class="badge ${d.status==='active'?'badge-green':d.status==='suspended'?'badge-amber':'badge-gray'}" style="font-size:11px">${d.status}</div>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>`).join('') + `</div>`;
+        }
+
+        function catColor(c) {
+            const m = {
+                antimalarial: '#dcfce7',
+                antibiotic: '#eff6ff',
+                antiretroviral: '#fef3c7',
+                analgesic: '#fee2e2',
+                antihypertensive: '#f3e8ff'
+            };
+            return m[c] || '#f3f4f6';
+        }
+
+        function catColorText(c) {
+            const m = {
+                antimalarial: '#16a34a',
+                antibiotic: '#2563eb',
+                antiretroviral: '#d97706',
+                analgesic: '#dc2626',
+                antihypertensive: '#7c3aed'
+            };
+            return m[c] || '#6b7280';
+        }
+
+        function filterDrugs() {
+            const q = document.getElementById('db-search').value.toLowerCase();
+            let filtered = DRUGS;
+            if (currentFilter !== 'all') filtered = filtered.filter(d => d.category === currentFilter);
+            if (q) filtered = filtered.filter(d => d.name.toLowerCase().includes(q) || d.id.toLowerCase().includes(q) ||
+                d.api.toLowerCase().includes(q));
+            renderDrugList(filtered);
+        }
+
+        function setFilter(cat, el) {
+            currentFilter = cat;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            filterDrugs();
+        }
+
+        function showDrugDetail(id) {
+            const drug = DRUGS.find(d => d.id === id);
+            if (!drug) return;
+            showResultSheet(drug.status === 'active' ? 'authentic' : 'unknown', drug.name, drug.id);
+        }
+
+        function submitReport() {
+            const name = document.getElementById('rep-drug-name').value.trim();
+            const loc = document.getElementById('rep-location').value;
+            const city = document.getElementById('rep-city').value.trim();
+            if (!name || !loc || !city) {
+                showToast('Please fill all required fields');
+                return;
+            }
+
+            reportCount++;
+            try {
+                localStorage.setItem('reportCount', reportCount);
+            } catch (e) {}
+
+            const ref = 'NF-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).slice(2, 5)
+                .toUpperCase();
+            document.getElementById('report-ref').textContent = ref;
+            document.getElementById('report-form-wrap').style.display = 'none';
+            document.getElementById('report-success').style.display = 'block';
+
+            const badge = document.getElementById('report-badge');
+            badge.style.display = 'block';
+            badge.textContent = reportCount;
+        }
+
+        function resetReport() {
+            document.getElementById('rep-drug-name').value = '';
+            document.getElementById('rep-nafdac').value = '';
+            document.getElementById('rep-location').value = '';
+            document.getElementById('rep-city').value = '';
+            document.getElementById('rep-details').value = '';
+            document.querySelectorAll('#suspicion-checks input').forEach(c => c.checked = false);
+            document.getElementById('report-form-wrap').style.display = 'block';
+            document.getElementById('report-success').style.display = 'none';
+        }
+
+        function renderSparkline() {
+            const data = [2100, 3400, 2800, 4100, 3800, 5200, 4700];
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const max = Math.max(...data);
+            const el = document.getElementById('sparkline');
+            el.innerHTML = data.map((v, i) => `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="width:100%;background:${i===6?'var(--green)':'var(--gray-200)'};border-radius:4px 4px 0 0;height:${Math.round(v/max*70)}px;transition:height 0.5s ease"></div>
+      <div style="font-size:10px;color:var(--gray-400)">${days[i]}</div>
+    </div>`).join('');
+
+            const dots = document.getElementById('map-dots');
+            const spots = [{
+                    x: 28,
+                    y: 48,
+                    size: 16,
+                    color: 'var(--red)'
+                },
+                {
+                    x: 55,
+                    y: 38,
+                    size: 10,
+                    color: 'var(--amber)'
+                },
+                {
+                    x: 42,
+                    y: 62,
+                    size: 8,
+                    color: 'var(--amber)'
+                },
+                {
+                    x: 70,
+                    y: 55,
+                    size: 6,
+                    color: 'var(--green)'
+                },
+                {
+                    x: 35,
+                    y: 32,
+                    size: 5,
+                    color: 'var(--green)'
+                },
+                {
+                    x: 62,
+                    y: 30,
+                    size: 7,
+                    color: 'var(--amber)'
+                },
+                {
+                    x: 80,
+                    y: 45,
+                    size: 4,
+                    color: 'var(--green)'
+                },
+            ];
+            dots.innerHTML = spots.map(s =>
+                `<div class="map-dot" style="left:${s.x}%;top:${s.y}%;width:${s.size}px;height:${s.size}px;background:${s.color};opacity:0.6;transform:translate(-50%,-50%)"></div>`
+                ).join('');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        renderSparkline();
+        if (reportCount > 0) {
+            const badge = document.getElementById('report-badge');
+            badge.style.display = 'block';
+            badge.textContent = reportCount;
+        }
+    </script>
+</body>
+
+</html>
