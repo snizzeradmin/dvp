@@ -1551,14 +1551,16 @@
             display: flex;
             flex-direction: column;
             background: #f8faf9;
-            transform: translateY(100%);
+            transform: translateY(calc(100% + 64px));
             transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
             pointer-events: none;
+            visibility: hidden;
         }
 
         #ai-chat-panel.open {
             transform: translateY(0);
             pointer-events: all;
+            visibility: visible;
         }
 
         .ai-chat-header {
