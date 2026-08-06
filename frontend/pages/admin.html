@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Aegis Vote</title>
+  <meta name="description" content="Aegis Vote administrative dashboard. Manage elections, candidates, voter approvals, and system logs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* Admin-specific styling */
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .sidebar {
+      width: 260px;
+      background: var(--c-gray-900);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--c-primary-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      padding: 1rem 0;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.5rem;
+      color: rgba(255,255,255,0.6);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    
+    .sidebar-item:hover {
+      color: white;
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .sidebar-item.active {
+      color: white;
+      background: rgba(29, 78, 216, 0.4);
+      border-left: 4px solid var(--c-primary-light);
+    }
+
+    .main-content {
+      flex: 1;
+      background: var(--c-gray-50);
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn var(--t-base);
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-card {
+      background: white;
+      border: 1px solid var(--c-gray-200);
+      border-radius: var(--r-xl);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .summary-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(29, 78, 216, 0.08);
+      color: var(--c-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .summary-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--c-gray-900);
+    }
+
+    .summary-label {
+      font-size: 0.8rem;
+      color: var(--c-gray-500);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span style="font-size: 1.5rem">🛡</span> Aegis Vote Admin
+    </div>
+    <nav class="sidebar-menu">
+      <button class="sidebar-item active" data-tab="tab-overview">
+        <span class="sidebar-item-icon">📊</span> Overview
+      </button>
+      <button class="sidebar-item" data-tab="tab-elections">
+        <span class="sidebar-item-icon">🗳</span> Elections
+      </button>
+      <button class="sidebar-item" data-tab="tab-candidates">
+        <span class="sidebar-item-icon">👤</span> Candidates
+      </button>
+      <button class="sidebar-item" data-tab="tab-voters">
+        <span class="sidebar-item-icon">👥</span> Voter Approval
+      </button>
+      <button class="sidebar-item" data-tab="tab-logs">
+        <span class="sidebar-item-icon">📜</span> System Logs
+      </button>
+    </nav>
+    <div style="padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08)">
+      <button id="btn-logout" class="btn btn-ghost btn--sm btn--full" style="color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.15)">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem">
+      <div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--c-gray-900)">Control Center</h1>
+        <p style="color: var(--c-gray-500); font-size: 0.9rem">System configuration and deployment status</p>
+      </div>
+      <div id="blockchain-status-badge">
+        <span class="badge badge-gray">Checking Blockchain...</span>
+      </div>
+    </header>
+
+    <!-- ── TAB: OVERVIEW ────────────────────────────────────────────────────── -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div>
+            <div class="summary-value" id="count-elections">—</div>
+            <div class="summary-label">Elections</div>
+          </div>
+          <div class="summary-icon">🗳</div>
+        </div>
+        <div class="summary-card">
+          <div>
+            <div class="summary-value" id="count-voters">—</div>
+            <div class="summary-label">Registered Voters</div>
+          </div>
+          <div class="summary-icon">👥</div>
+        </div>
+        <div class="summary-card">
+          <div>
+            <div class="summary-value" id="count-pending">—</div>
+            <div class="summary-label">Pending Approval</div>
+          </div>
+          <div class="summary-icon" style="background: rgba(245, 158, 11, 0.08); color: var(--c-warning)">⏳</div>
+        </div>
+        <div class="summary-card">
+          <div>
+            <div class="summary-value" id="blockchain-height">—</div>
+            <div class="summary-label">Block Height</div>
+          </div>
+          <div class="summary-icon" style="background: rgba(16, 185, 129, 0.08); color: var(--c-success)">⛓</div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 1.5rem">
+        <!-- Active smart contract status -->
+        <div class="card">
+          <div class="card__header">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Smart Contract Info</h3>
+          </div>
+          <div class="card__body">
+            <div style="display: flex; flex-direction: column; gap: 0.85rem">
+              <div style="display: flex; justify-content: space-between; font-size: 0.9rem">
+                <span style="color: var(--c-gray-500)">Network:</span>
+                <strong id="contract-network">—</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.9rem">
+                <span style="color: var(--c-gray-500)">Contract Address:</span>
+                <strong id="contract-address" style="font-family: monospace; font-size: 0.8rem">—</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.9rem">
+                <span style="color: var(--c-gray-500)">Deployment Date:</span>
+                <span id="contract-date">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+          <div class="card__header">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Quick Actions</h3>
+          </div>
+          <div class="card__body" style="display: flex; flex-direction: column; gap: 0.75rem">
+            <a href="../../voting.html" class="btn btn-ghost btn--sm btn--full" target="_blank">View Portal Home ↗</a>
+            <a href="results.html" class="btn btn-secondary btn--sm btn--full">Live Results Portal</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: ELECTIONS ───────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-elections">
+      <div class="card" style="margin-bottom: 2rem">
+        <div class="card__header" style="display: flex; justify-content: space-between; align-items: center">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Create Election</h3>
+          <span class="badge badge-gray">Draft Status</span>
+        </div>
+        <div class="card__body">
+          <form id="form-create-election">
+            <div class="form-group">
+              <label class="form-label" for="el-title">Election Title <span class="required">*</span></label>
+              <input type="text" id="el-title" class="form-input" placeholder="e.g. General Election 2026" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="el-desc">Description</label>
+              <textarea id="el-desc" class="form-textarea" rows="3" placeholder="Provide election background..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-save-election">Create Election Draft</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Manage Elections</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Contract</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="elections-list-tbody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--c-gray-400)">Loading elections...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: CANDIDATES ──────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-candidates">
+      <div class="card" style="margin-bottom: 2rem">
+        <div class="card__header">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Register Candidate</h3>
+          <p style="font-size: 0.8rem; color: var(--c-gray-500); margin-top: 0.25rem">Candidates can only be added to draft elections</p>
+        </div>
+        <div class="card__body">
+          <form id="form-add-candidate">
+            <div class="form-group">
+              <label class="form-label" for="cand-election">Election <span class="required">*</span></label>
+              <select id="cand-election" class="form-select" required>
+                <option value="">-- Select draft election --</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="cand-name">Candidate Name <span class="required">*</span></label>
+                <input type="text" id="cand-name" class="form-input" placeholder="e.g. Alex Rivera" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cand-party">Political Party <span class="required">*</span></label>
+                <input type="text" id="cand-party" class="form-input" placeholder="e.g. Progressive Alliance" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cand-bio">Biography</label>
+              <textarea id="cand-bio" class="form-textarea" rows="3" placeholder="Brief background information..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cand-img">Image URL</label>
+              <input type="url" id="cand-img" class="form-input" placeholder="https://example.com/photo.jpg">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-save-candidate">Add Candidate</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Registered Candidates</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Name</th>
+                <th>Party</th>
+                <th>Election</th>
+                <th>Contract Index</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="candidates-list-tbody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--c-gray-400)">Select a draft election above or add a candidate</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: VOTERS ──────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-voters">
+      <div class="card" style="margin-bottom: 1.5rem">
+        <div class="card__header" style="display: flex; justify-content: space-between; align-items: center">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Batch Approvals</h3>
+          <button id="btn-batch-approve" class="btn btn-success btn--sm" disabled>Approve Selected</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__header">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Voter Registrations</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 40px"><input type="checkbox" id="check-all-voters"></th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Govt ID</th>
+                <th>Wallet Address</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="voters-list-tbody">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--c-gray-400)">Loading voters list...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: LOGS ────────────────────────────────────────────────────────── -->
+    <div class="tab-content" id="tab-logs">
+      <div class="card">
+        <div class="card__header" style="display: flex; justify-content: space-between; align-items: center">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--c-gray-900)">Audit Logs</h3>
+          <button id="btn-refresh-logs" class="btn btn-ghost btn--sm">↻ Refresh</button>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Event</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="logs-list-tbody">
+              <tr>
+                <td colspan="3" style="text-align: center; color: var(--c-gray-400)">Loading system audit logs...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { api, getStoredUser, requireAdmin, showToast, sanitize } from '../js/api.js';
+  import { logout } from '../js/auth.js';
+
+  if (!requireAdmin()) throw new Error('Unauthorized');
+
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
+  // ── Tab Management ─────────────────────────────────────────────────────────
+  const tabs = document.querySelectorAll('.sidebar-item');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      const tabId = tab.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach((tc) => tc.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+
+      // Trigger specific tab loading
+      if (tabId === 'tab-overview') loadOverview();
+      else if (tabId === 'tab-elections') loadElectionsTab();
+      else if (tabId === 'tab-candidates') loadCandidatesTab();
+      else if (tabId === 'tab-voters') loadVotersTab();
+      else if (tabId === 'tab-logs') loadLogsTab();
+    });
+  });
+
+  // ── Global Stats & BC Connectivity ─────────────────────────────────────────
+  async function loadOverview() {
+    try {
+      const bc = await api.get('/api/blockchain/status');
+      const badge = document.getElementById('blockchain-status-badge');
+      if (bc.connected) {
+        badge.innerHTML = `<span class="badge badge-success badge-dot">Blockchain Node Connected</span>`;
+        document.getElementById('blockchain-height').textContent = bc.blockNumber.toLocaleString();
+        
+        const config = bc.contractAddress ? bc : null;
+        if (config) {
+          document.getElementById('contract-network').textContent = config.network || 'localhost';
+          document.getElementById('contract-address').textContent = config.contractAddress;
+          document.getElementById('contract-date').textContent = new Date().toLocaleDateString();
+        }
+      } else {
+        badge.innerHTML = `<span class="badge badge-danger badge-dot">Blockchain Disconnected</span>`;
+        document.getElementById('blockchain-height').textContent = 'Error';
+      }
+
+      // Load counts
+      const elRes = await api.get('/api/elections');
+      document.getElementById('count-elections').textContent = elRes.elections.length;
+
+      const vtRes = await api.get('/api/voters');
+      document.getElementById('count-voters').textContent = vtRes.voters.length;
+      document.getElementById('count-pending').textContent = vtRes.voters.filter(v => !v.isApproved).length;
+
+    } catch (err) {
+      showToast('Failed to load overview metrics: ' + err.message, 'error');
+    }
+  }
+
+  // ── Elections Management ────────────────────────────────────────────────────
+  async function loadElectionsTab() {
+    const listBody = document.getElementById('elections-list-tbody');
+    listBody.innerHTML = '<tr><td colspan="4" style="text-align: center">Loading...</td></tr>';
+    
+    try {
+      const res = await api.get('/api/elections');
+      const elections = res.elections;
+      
+      if (elections.length === 0) {
+        listBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--c-gray-400)">No elections found. Create one above.</td></tr>';
+        return;
+      }
+      
+      listBody.innerHTML = '';
+      elections.forEach((el) => {
+        const tr = document.createElement('tr');
+        
+        let actions = '';
+        if (el.status === 'draft') {
+          actions = `
+            <button class="btn btn-success btn--sm btn-start-el" data-id="${el._id}">Start Election</button>
+            <button class="btn btn-danger btn--sm btn-delete-el" style="margin-left: 0.5rem" data-id="${el._id}">Delete</button>
+          `;
+        } else if (el.status === 'active') {
+          actions = `<button class="btn btn-danger btn--sm btn-end-el" data-id="${el._id}">End Election</button>`;
+        } else {
+          actions = `<span class="badge badge-gray">No actions</span>`;
+        }
+
+        const contractLink = el.contractAddress 
+          ? `<span style="font-family: monospace; font-size: 0.75rem">${sanitize(el.contractAddress.slice(0, 10))}...</span>`
+          : '<em style="color: var(--c-gray-400)">Not deployed</em>';
+
+        tr.innerHTML = `
+          <td><strong>${sanitize(el.title)}</strong></td>
+          <td><span class="badge ${el.status === 'active' ? 'badge-success' : el.status === 'ended' ? 'badge-danger' : 'badge-gray'}">${el.status.toUpperCase()}</span></td>
+          <td>${contractLink}</td>
+          <td>${actions}</td>
+        `;
+        listBody.appendChild(tr);
+      });
+
+      // Hook action listeners
+      document.querySelectorAll('.btn-start-el').forEach(b => b.addEventListener('click', startElection));
+      document.querySelectorAll('.btn-end-el').forEach(b => b.addEventListener('click', endElection));
+      document.querySelectorAll('.btn-delete-el').forEach(b => b.addEventListener('click', deleteElection));
+      
+    } catch (err) {
+      listBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--c-danger)">Error: ${sanitize(err.message)}</td></tr>`;
+    }
+  }
+
+  document.getElementById('form-create-election').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('el-title').value.trim();
+    const description = document.getElementById('el-desc').value.trim();
+    const submitBtn = document.getElementById('btn-save-election');
+
+    submitBtn.disabled = true;
+    try {
+      await api.post('/api/elections', { title, description });
+      showToast('Election draft created', 'success');
+      document.getElementById('form-create-election').reset();
+      loadElectionsTab();
+    } catch (err) {
+      showToast('Failed to create election: ' + err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  async function startElection(e) {
+    const id = e.target.dataset.id;
+    if (!confirm('Are you sure you want to start this election? This opens voting on the blockchain.')) return;
+    
+    e.target.disabled = true;
+    e.target.textContent = 'Starting...';
+    try {
+      await api.post(`/api/elections/${id}/start`);
+      showToast('Election is now live and voting is open', 'success');
+      loadElectionsTab();
+    } catch (err) {
+      showToast('Error starting election: ' + err.message, 'error');
+      e.target.disabled = false;
+      e.target.textContent = 'Start Election';
+    }
+  }
+
+  async function endElection(e) {
+    const id = e.target.dataset.id;
+    if (!confirm('Are you sure you want to end this election? Voting will be permanently closed.')) return;
+    
+    e.target.disabled = true;
+    e.target.textContent = 'Ending...';
+    try {
+      await api.post(`/api/elections/${id}/end`);
+      showToast('Election ended successfully', 'success');
+      loadElectionsTab();
+    } catch (err) {
+      showToast('Error ending election: ' + err.message, 'error');
+      e.target.disabled = false;
+      e.target.textContent = 'End Election';
+    }
+  }
+
+  async function deleteElection(e) {
+    const id = e.target.dataset.id;
+    if (!confirm('Delete this election draft?')) return;
+    
+    try {
+      await api.delete(`/api/elections/${id}`);
+      showToast('Election deleted', 'success');
+      loadElectionsTab();
+    } catch (err) {
+      showToast('Error deleting: ' + err.message, 'error');
+    }
+  }
+
+  // ── Candidates Management ───────────────────────────────────────────────────
+  async function loadCandidatesTab() {
+    const select = document.getElementById('cand-election');
+    const candBody = document.getElementById('candidates-list-tbody');
+    
+    try {
+      const res = await api.get('/api/elections');
+      const drafts = res.elections.filter(e => e.status === 'draft');
+      
+      // Update selector
+      select.innerHTML = '<option value="">-- Select draft election --</option>';
+      drafts.forEach((e) => {
+        const opt = document.createElement('option');
+        opt.value = e._id;
+        opt.textContent = e.title;
+        select.appendChild(opt);
+      });
+
+      // Hook reload on select change
+      select.onchange = async () => {
+        const elId = select.value;
+        if (!elId) {
+          candBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--c-gray-400)">Select a draft election above</td></tr>';
+          return;
+        }
+        await loadCandidatesList(elId);
+      };
+
+    } catch (err) {
+      showToast('Failed to load draft elections: ' + err.message, 'error');
+    }
+  }
+
+  async function loadCandidatesList(electionId) {
+    const candBody = document.getElementById('candidates-list-tbody');
+    candBody.innerHTML = '<tr><td colspan="6" style="text-align: center">Loading...</td></tr>';
+    
+    try {
+      const res = await api.get(`/api/candidates?electionId=${electionId}`);
+      const candidates = res.candidates;
+      
+      if (candidates.length === 0) {
+        candBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--c-gray-400)">No candidates registered. Add one above.</td></tr>';
+        return;
+      }
+
+      candBody.innerHTML = '';
+      candidates.forEach((c) => {
+        const tr = document.createElement('tr');
+        const img = c.imageUrl 
+          ? `<img src="${sanitize(c.imageUrl)}" style="width:36px;height:36px;border-radius:50%;object-fit:cover" alt="">`
+          : '👤';
+        
+        tr.innerHTML = `
+          <td>${img}</td>
+          <td><strong>${sanitize(c.name)}</strong></td>
+          <td>${sanitize(c.party)}</td>
+          <td>${sanitize(c.electionId?.title || 'Current')}</td>
+          <td>${c.blockchainId}</td>
+          <td><button class="btn btn-danger btn--sm btn-delete-cand" data-id="${c._id}">Remove</button></td>
+        `;
+        candBody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.btn-delete-cand').forEach(b => b.addEventListener('click', async (e) => {
+        if (!confirm('Remove this candidate?')) return;
+        try {
+          await api.delete(`/api/candidates/${e.target.dataset.id}`);
+          showToast('Candidate removed', 'success');
+          loadCandidatesList(electionId);
+        } catch (err) {
+          showToast('Error removing: ' + err.message, 'error');
+        }
+      }));
+
+    } catch (err) {
+      candBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--c-danger)">Error: ${sanitize(err.message)}</td></tr>`;
+    }
+  }
+
+  document.getElementById('form-add-candidate').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const electionId = document.getElementById('cand-election').value;
+    const name = document.getElementById('cand-name').value.trim();
+    const party = document.getElementById('cand-party').value.trim();
+    const bio = document.getElementById('cand-bio').value.trim();
+    const imageUrl = document.getElementById('cand-img').value.trim();
+    const submitBtn = document.getElementById('btn-save-candidate');
+
+    if (!electionId) {
+      showToast('Please select a draft election first', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    try {
+      await api.post('/api/candidates', { electionId, name, party, bio, imageUrl: imageUrl || undefined });
+      showToast('Candidate added successfully', 'success');
+      document.getElementById('form-add-candidate').reset();
+      document.getElementById('cand-election').value = electionId;
+      loadCandidatesList(electionId);
+    } catch (err) {
+      showToast('Failed to add candidate: ' + err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ── Voter Approvals ─────────────────────────────────────────────────────────
+  async function loadVotersTab() {
+    const tbody = document.getElementById('voters-list-tbody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center">Loading...</td></tr>';
+    
+    try {
+      const res = await api.get('/api/voters');
+      const voters = res.voters;
+      
+      if (voters.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--c-gray-400)">No registered voters found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      voters.forEach((v) => {
+        const tr = document.createElement('tr');
+        const checked = v.isApproved ? 'disabled' : '';
+        const badge = v.isApproved 
+          ? '<span class="badge badge-success">Approved</span>' 
+          : '<span class="badge badge-warning">Pending</span>';
+
+        const action = v.isApproved 
+          ? '<span style="color:var(--c-gray-400)">—</span>'
+          : `<button class="btn btn-primary btn--sm btn-approve-voter" data-id="${v._id}">Approve Wallet</button>`;
+
+        tr.innerHTML = `
+          <td><input type="checkbox" class="check-voter" data-id="${v._id}" ${checked}></td>
+          <td><strong>${sanitize(v.name)}</strong></td>
+          <td>${sanitize(v.email)}</td>
+          <td>${sanitize(v.idNumber)}</td>
+          <td><span style="font-family: monospace; font-size: 0.8rem">${sanitize(v.walletAddress)}</span></td>
+          <td>${badge}</td>
+          <td>${action}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Hook checkboxes
+      const checkAll = document.getElementById('check-all-voters');
+      checkAll.checked = false;
+      checkAll.onchange = () => {
+        document.querySelectorAll('.check-voter:not(:disabled)').forEach(cb => cb.checked = checkAll.checked);
+        updateBatchButtonState();
+      };
+
+      document.querySelectorAll('.check-voter').forEach(cb => {
+        cb.onchange = () => {
+          updateBatchButtonState();
+        };
+      });
+
+      // Approve listener
+      document.querySelectorAll('.btn-approve-voter').forEach(btn => {
+        btn.addEventListener('click', approveVoter);
+      });
+
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--c-danger)">Error: ${sanitize(err.message)}</td></tr>`;
+    }
+  }
+
+  function updateBatchButtonState() {
+    const selected = document.querySelectorAll('.check-voter:checked').length;
+    const btn = document.getElementById('btn-batch-approve');
+    btn.disabled = selected === 0;
+    btn.textContent = selected > 0 ? `Approve Selected (${selected})` : 'Approve Selected';
+  }
+
+  async function approveVoter(e) {
+    const id = e.target.dataset.id;
+    e.target.disabled = true;
+    e.target.textContent = 'Approving...';
+    
+    try {
+      await api.post('/api/voters/approve', { userId: id });
+      showToast('Voter wallet approved on blockchain', 'success');
+      loadVotersTab();
+    } catch (err) {
+      showToast('Approval failed: ' + err.message, 'error');
+      e.target.disabled = false;
+      e.target.textContent = 'Approve Wallet';
+    }
+  }
+
+  document.getElementById('btn-batch-approve').addEventListener('click', async () => {
+    const selected = Array.from(document.querySelectorAll('.check-voter:checked')).map(cb => cb.dataset.id);
+    if (selected.length === 0) return;
+    
+    const btn = document.getElementById('btn-batch-approve');
+    btn.disabled = true;
+    btn.textContent = 'Approving batch...';
+    
+    try {
+      await api.post('/api/voters/approve-batch', { userIds: selected });
+      showToast(`${selected.length} voters approved on blockchain`, 'success');
+      loadVotersTab();
+    } catch (err) {
+      showToast('Batch approval failed: ' + err.message, 'error');
+    } finally {
+      updateBatchButtonState();
+    }
+  });
+
+  // ── Logs Tab ────────────────────────────────────────────────────────────────
+  async function loadLogsTab() {
+    const tbody = document.getElementById('logs-list-tbody');
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center">Loading...</td></tr>';
+    
+    try {
+      // Create a dummy endpoint or use admin action log fetch if supported,
+      // here we simulate or read from database logs via a generic query.
+      // Wait, let's look if we have a log endpoint. No endpoint for logs existed!
+      // Let's create one or query via server. Since we didn't add the routes for /api/logs,
+      // we can add a route inside server.js or backend routes.
+      // Wait! Let's mock logs or create the endpoint. Let's make sure it queries actual logs.
+      // Since it's clean and safe to have the real endpoint, let's look if we should create it.
+      // Yes! Let's add GET /api/logs to routes/admin.js or candidates.js/voters.js, or simply to voters.js.
+      // Let's check voters.js first. It had GET /api/voters. Let's check routes/blockchain.js.
+      // Wait, we can fetch logs in voters.js or create a new route.
+      // Let's add GET /api/voters/logs to routes/voters.js!
+      
+      const res = await api.get('/api/voters/logs');
+      const logs = res.logs;
+      
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--c-gray-400)">No logs available.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      logs.forEach((log) => {
+        const tr = document.createElement('tr');
+        const time = new Date(log.createdAt).toLocaleString();
+        tr.innerHTML = `
+          <td style="white-space: nowrap">${sanitize(time)}</td>
+          <td><span class="badge badge-gray">${sanitize(log.event)}</span></td>
+          <td><pre style="font-size:0.75rem;margin:0;white-space:pre-wrap;font-family:inherit">${sanitize(JSON.stringify(log.metadata || {}))}</pre></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--c-danger)">Error: ${sanitize(err.message)}</td></tr>`;
+    }
+  }
+
+  document.getElementById('btn-refresh-logs').addEventListener('click', loadLogsTab);
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadOverview();
+</script>
+</body>
+</html>

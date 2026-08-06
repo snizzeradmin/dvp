@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Election Results — Aegis Vote | Digital Voting Platform</title>
+  <meta name="description" content="View live election results read directly from the Ethereum blockchain.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<!-- ── Navbar ─────────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="navbar__inner">
+    <a href="../../voting.html" class="navbar__brand" id="nav-home">
+      <div class="navbar__brand-icon">🗳</div>
+      Aegis Vote
+    </a>
+    <div class="navbar__nav">
+      <a href="dashboard.html" class="navbar__link" id="nav-dashboard">Dashboard</a>
+      <a href="vote.html" class="navbar__link" id="nav-vote">Vote</a>
+      <a href="results.html" class="navbar__link active" id="nav-results">Results</a>
+    </div>
+    <div class="navbar__actions">
+      <button id="btn-refresh" class="btn btn-ghost btn--sm">↻ Refresh</button>
+      <button id="btn-logout" class="btn btn-ghost btn--sm">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ───────────────────────────────────────────────────────────────────── -->
+<main style="padding-bottom:4rem">
+
+  <div class="page-hero" style="padding:2.5rem 0 2rem">
+    <div class="container">
+      <div class="page-hero__content">
+        <p class="page-hero__eyebrow">⛓ Live Blockchain Data</p>
+        <h1 class="page-hero__title" style="font-size:2rem">Election Results</h1>
+        <p class="page-hero__subtitle" style="font-size:0.95rem">Results are read directly from the smart contract — live and tamper-proof</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:800px;padding-top:2.5rem">
+
+    <!-- Blockchain source notice -->
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r-lg);margin-bottom:2rem;font-size:0.8rem;color:#1e40af">
+      <span style="font-size:1.1rem">⛓</span>
+      <span><strong>Source of truth:</strong> All vote totals are read directly from the Ethereum smart contract. This page cannot display falsified data.</span>
+    </div>
+
+    <!-- Alert area -->
+    <div id="alert-area" style="margin-bottom:1.5rem"></div>
+
+    <!-- Election selector (if multiple) -->
+    <div id="election-selector" style="margin-bottom:1.5rem;display:none">
+      <label class="form-label" for="election-select">Select Election</label>
+      <select id="election-select" class="form-select"></select>
+    </div>
+
+    <!-- Results container -->
+    <div class="card">
+      <div class="card__body">
+        <div id="results-container"></div>
+      </div>
+    </div>
+
+    <!-- Verify transaction -->
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card__header">
+        <h3 style="font-size:1rem;font-weight:700;color:var(--c-gray-900)">🔍 Verify Your Vote</h3>
+        <p style="font-size:0.8rem;color:var(--c-gray-500);margin-top:0.25rem">Enter your transaction hash to confirm your vote was recorded</p>
+      </div>
+      <div class="card__body">
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap" id="verify-form-area">
+          <input
+            type="text"
+            id="tx-hash-input"
+            class="form-input"
+            placeholder="0x... (64-character transaction hash)"
+            style="flex:1;min-width:200px"
+          >
+          <button id="btn-verify" class="btn btn-secondary">Verify on Blockchain</button>
+        </div>
+        <div id="verify-result" style="margin-top:1rem"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script type="module">
+  import { api, getStoredUser, requireAuth, showToast, sanitize } from '../js/api.js';
+  import { logout } from '../js/auth.js';
+  import { loadAndRenderResults } from '../js/results.js';
+
+  if (!requireAuth()) throw new Error('Not authenticated');
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
+  const user = getStoredUser();
+
+  let currentElectionId = null;
+
+  // ── Load election and render results ───────────────────────────────────────
+  async function init() {
+    const container = document.getElementById('results-container');
+
+    try {
+      const data = await api.get('/api/elections/active');
+
+      if (data.election) {
+        currentElectionId = data.election._id;
+        await loadAndRenderResults(currentElectionId, container);
+      } else {
+        // Try to find an ended election
+        if (user?.role === 'admin') {
+          const allData = await api.get('/api/elections');
+          const ended = allData.elections.filter((e) => e.status === 'ended');
+          if (ended.length > 0) {
+            const selector = document.getElementById('election-selector');
+            selector.style.display = 'block';
+            const select = document.getElementById('election-select');
+            ended.forEach((e) => {
+              const opt = document.createElement('option');
+              opt.value = e._id;
+              opt.textContent = `${e.title} (${e.status})`;
+              select.appendChild(opt);
+            });
+            currentElectionId = ended[0]._id;
+            select.addEventListener('change', () => {
+              currentElectionId = select.value;
+              loadAndRenderResults(currentElectionId, container);
+            });
+            await loadAndRenderResults(currentElectionId, container);
+            return;
+          }
+        }
+        container.innerHTML = `
+          <div style="text-align:center;padding:3rem">
+            <div style="font-size:3rem;margin-bottom:1rem">📊</div>
+            <h3 style="color:var(--c-gray-500);font-weight:500">No Results Available</h3>
+            <p style="color:var(--c-gray-400);font-size:0.875rem;margin-top:0.5rem">
+              Results will be shown once an election has been held.
+            </p>
+          </div>`;
+      }
+    } catch (err) {
+      container.innerHTML = `
+        <div class="alert alert-danger">
+          <span class="alert__icon">⚠</span>
+          <div>${sanitize(err.message)}</div>
+        </div>`;
+    }
+  }
+
+  // ── Refresh ────────────────────────────────────────────────────────────────
+  document.getElementById('btn-refresh').addEventListener('click', async () => {
+    if (currentElectionId) {
+      const container = document.getElementById('results-container');
+      await loadAndRenderResults(currentElectionId, container);
+      showToast('Results refreshed from blockchain', 'success');
+    }
+  });
+
+  // ── Verify transaction ─────────────────────────────────────────────────────
+  document.getElementById('btn-verify').addEventListener('click', async () => {
+    const hash    = document.getElementById('tx-hash-input').value.trim();
+    const resultEl = document.getElementById('verify-result');
+
+    if (!/^0x[a-fA-F0-9]{64}$/.test(hash)) {
+      resultEl.innerHTML = `<div class="alert alert-danger"><span class="alert__icon">⚠</span><div>Please enter a valid transaction hash (0x followed by 64 hex characters).</div></div>`;
+      return;
+    }
+
+    resultEl.innerHTML = `<div style="display:flex;align-items:center;gap:0.75rem;color:var(--c-gray-500);font-size:0.875rem"><div class="spinner spinner--sm"></div> Checking blockchain...</div>`;
+
+    try {
+      const data = await api.post('/api/blockchain/verify-tx', { txHash: hash });
+      if (data.transaction) {
+        const t = data.transaction;
+        resultEl.innerHTML = `
+          <div class="alert alert-success">
+            <span class="alert__icon">✓</span>
+            <div class="alert__content">
+              <div class="alert__title">Transaction Verified</div>
+              <p style="margin-top:0.25rem;font-size:0.8rem">
+                <strong>Status:</strong> ${sanitize(t.status)} &nbsp;·&nbsp;
+                <strong>Block:</strong> ${sanitize(String(t.blockNumber))} &nbsp;·&nbsp;
+                <strong>From:</strong> ${sanitize(t.from.slice(0,8))}...
+              </p>
+            </div>
+          </div>`;
+      }
+    } catch (err) {
+      resultEl.innerHTML = `<div class="alert alert-danger"><span class="alert__icon">⚠</span><div>${sanitize(err.message)}</div></div>`;
+    }
+  });
+
+  // ── Also allow Enter key on hash input ────────────────────────────────────
+  document.getElementById('tx-hash-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-verify').click();
+  });
+
+  init();
+</script>
+</body>
+</html>

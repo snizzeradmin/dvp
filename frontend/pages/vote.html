@@ -1,0 +1,702 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cast Your Vote â€” Aegis Vote | Digital Voting Platform</title>
+  <meta name="description" content="Select your candidate and cast your blockchain-secured vote in the Aegis Vote voting system.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .vote-step {
+      display: none;
+    }
+    .vote-step.active {
+      display: block;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .tx-loading {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    .tx-loading .spinner { margin: 0 auto 1.5rem; }
+
+    .success-banner {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+      border-radius: var(--r-2xl);
+      padding: 2.5rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+    }
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 1.25rem;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* â”€â”€ Simulated MetaMask popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    .metamask-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .metamask-popup {
+      width: 360px;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+      animation: slideUp 0.3s cubic-bezier(0.34,1.4,0.64,1);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(30px) scale(0.96); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .mm-header {
+      background: linear-gradient(135deg, #f6851b 0%, #e2761b 100%);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+    }
+    .mm-fox-icon {
+      width: 36px;
+      height: 36px;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .mm-header-text { flex: 1; }
+    .mm-header-title { font-weight: 700; font-size: 0.9rem; line-height: 1.2; }
+    .mm-header-sub   { font-size: 0.72rem; opacity: 0.85; }
+    .mm-body { padding: 1.25rem; }
+    .mm-site-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .mm-site-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg,#2563eb,#7c3aed);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .mm-site-name  { font-weight: 700; font-size: 0.85rem; color: #111; }
+    .mm-site-url   { font-size: 0.72rem; color: #6b7280; }
+    .mm-account-row {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .mm-account-dot {
+      width: 10px; height: 10px;
+      background: #22c55e;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mm-account-label { font-size: 0.72rem; color: #166534; font-weight: 600; }
+    .mm-account-addr  { font-size: 0.75rem; color: #374151; font-family: monospace; }
+    .mm-permissions {
+      margin-bottom: 1rem;
+    }
+    .mm-permissions-title { font-size: 0.72rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .mm-perm-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; color: #374151; margin-bottom: 0.4rem;
+    }
+    .mm-perm-check { color: #22c55e; font-weight: 700; }
+    .mm-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      padding: 0 1.25rem 1.25rem;
+    }
+    .mm-btn-cancel {
+      padding: 0.65rem;
+      border: 2px solid #d1d5db;
+      background: white;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      color: #374151;
+      transition: all 0.15s;
+    }
+    .mm-btn-cancel:hover { background: #f9fafb; }
+    .mm-btn-connect {
+      padding: 0.65rem;
+      background: linear-gradient(135deg,#f6851b,#e2761b);
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      color: white;
+      transition: all 0.15s;
+    }
+    .mm-btn-connect:hover { opacity: 0.9; transform: translateY(-1px); }
+    .mm-btn-connect:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    /* Transaction approval specific styles */
+    .mm-tx-details {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.82rem;
+    }
+    .mm-tx-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+    .mm-tx-row:last-child { margin-bottom: 0; }
+    .mm-tx-label { color: #6b7280; font-weight: 600; }
+    .mm-tx-value { color: #111; font-family: monospace; font-size: 0.75rem; }
+    .mm-gas-row {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .mm-gas-label { color: #92400e; font-weight: 600; }
+    .mm-gas-value { color: #92400e; font-family: monospace; }
+    .mm-warning-banner {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.75rem;
+      color: #9a3412;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- â”€â”€ Navbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<nav class="navbar">
+  <div class="navbar__inner">
+    <a href="../../voting.html" class="navbar__brand" id="nav-home">
+      <div class="navbar__brand-icon">ðŸ—³</div>
+      Aegis Vote
+    </a>
+    <div class="navbar__nav">
+      <a href="dashboard.html" class="navbar__link" id="nav-dashboard">Dashboard</a>
+      <a href="vote.html" class="navbar__link active" id="nav-vote">Vote</a>
+      <a href="results.html" class="navbar__link" id="nav-results">Results</a>
+    </div>
+    <div class="navbar__actions">
+      <div id="wallet-status-nav"></div>
+      <button id="btn-logout" class="btn btn-ghost btn--sm">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<main style="padding-bottom:4rem">
+
+  <!-- Page header -->
+  <div class="page-hero" style="padding:2.5rem 0 2rem">
+    <div class="container">
+      <div class="page-hero__content">
+        <p class="page-hero__eyebrow">ðŸ—³ Secure Voting</p>
+        <h1 class="page-hero__title" style="font-size:2rem">Cast Your Vote</h1>
+        <p class="page-hero__subtitle" style="font-size:0.95rem">Your vote is encrypted and permanently recorded on the Ethereum blockchain</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="max-width:1000px;padding-top:2rem">
+
+    <!-- Alert area -->
+    <div id="alert-area" style="margin-bottom:1.5rem"></div>
+
+    <div class="vote-step active" id="step-wallet">
+      <div class="card" style="max-width:500px;margin:0 auto">
+        <div class="card__body" style="text-align:center;padding:3rem 2.5rem">
+          <div style="font-size:3.5rem;margin-bottom:1.5rem">ðŸ¦Š</div>
+          <h2 style="margin-bottom:0.75rem">Connect Your Wallet</h2>
+          <p style="color:var(--c-gray-500);margin-bottom:2rem;font-size:0.9rem">
+            Connect your MetaMask wallet to verify your identity before voting.
+          </p>
+          <button id="btn-connect" class="btn btn-primary btn--lg btn--full">
+            ðŸ¦Š Connect MetaMask
+          </button>
+          <div style="margin-top:1rem;padding:0.75rem 1rem;background:#fef3c7;border-radius:8px;border:1px solid #fde68a">
+            <p style="font-size:0.78rem;color:#92400e;margin:0">ðŸ” <strong>Demo mode:</strong> A simulated MetaMask popup will appear. Click "Connect" to proceed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- â”€â”€ Step 2: Candidates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="vote-step" id="step-candidates">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+        <div>
+          <h2 style="font-size:1.5rem;color:var(--c-gray-900);margin-bottom:0.25rem" id="election-title-h">Select a Candidate</h2>
+          <p style="color:var(--c-gray-500);font-size:0.875rem">Click a card to select. Then click "Confirm Vote" to proceed.</p>
+        </div>
+        <div id="wallet-badge-area"></div>
+      </div>
+
+      <div id="candidates-container"></div>
+
+      <!-- Selection bar -->
+      <div id="selection-bar" style="display:none;position:sticky;bottom:2rem;background:white;border:2px solid var(--c-primary);border-radius:var(--r-xl);padding:1rem 1.5rem;box-shadow:var(--sh-xl);margin-top:2rem;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+        <div>
+          <div style="font-size:0.75rem;color:var(--c-gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Selected candidate</div>
+          <div id="selected-name" style="font-size:1.05rem;font-weight:700;color:var(--c-gray-900)"></div>
+          <div id="selected-party" style="font-size:0.8rem;color:var(--c-primary)"></div>
+        </div>
+        <button id="btn-confirm-vote" class="btn btn-primary btn--lg" disabled>
+          Confirm Vote â†’
+        </button>
+      </div>
+    </div>
+
+    <!-- â”€â”€ Step 3: Confirmation modal is handled in JS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+
+    <!-- â”€â”€ Step 4: Transaction loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="vote-step" id="step-tx">
+      <div class="card" style="max-width:500px;margin:0 auto">
+        <div class="card__body tx-loading">
+          <div class="spinner spinner--lg"></div>
+          <h3 id="tx-status-msg" style="color:var(--c-gray-800)">Submitting to blockchain...</h3>
+          <p style="color:var(--c-gray-500);margin-top:0.5rem;font-size:0.875rem">Please approve the transaction in MetaMask</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- â”€â”€ Step 5: Success â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+    <div class="vote-step" id="step-success">
+      <div class="success-banner">
+        <div class="success-icon">âœ“</div>
+        <h2 style="color:white;margin-bottom:0.75rem">Vote Recorded!</h2>
+        <p style="color:rgba(255,255,255,0.85);margin-bottom:1.75rem">
+          Your vote has been permanently written to the Ethereum blockchain.
+        </p>
+        <div class="tx-receipt" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.25);margin-bottom:1.5rem;text-align:left">
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.6);font-weight:700;margin-bottom:0.5rem;text-transform:uppercase">Transaction Hash</div>
+          <div id="tx-hash-display" class="tx-receipt__hash" style="color:white;background:rgba(255,255,255,0.1)"></div>
+          <p style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:0.5rem">Click to copy Â· Your vote proof</p>
+        </div>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+          <a href="results.html" class="btn" style="background:white;color:var(--c-success);font-weight:700">ðŸ“Š View Results</a>
+          <a href="dashboard.html" class="btn" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3)">â† Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- â”€â”€ Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="modal-overlay" id="confirm-modal" style="display:none">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal__header">
+      <div>
+        <div class="modal__title" id="modal-title">Confirm Your Vote</div>
+        <div class="modal__subtitle">This action cannot be undone once submitted to the blockchain</div>
+      </div>
+      <button class="modal__close" id="modal-close" aria-label="Close">âœ•</button>
+    </div>
+    <div class="modal__body">
+      <div style="background:var(--c-gray-50);border:1px solid var(--c-gray-200);border-radius:var(--r-xl);padding:1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem">
+        <div id="modal-candidate-avatar" style="width:56px;height:56px;background:var(--g-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">ðŸ‘¤</div>
+        <div>
+          <div id="modal-candidate-name" style="font-weight:700;font-size:1.1rem;color:var(--c-gray-900)"></div>
+          <div id="modal-candidate-party" style="font-size:0.875rem;color:var(--c-primary);font-weight:600"></div>
+        </div>
+      </div>
+      <div class="alert alert-warning">
+        <span class="alert__icon">âš </span>
+        <div class="alert__content">
+          <div class="alert__title">You can only vote once</div>
+          <p>After confirming, a simulated blockchain transaction will be submitted. Your vote cannot be changed.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+      <button id="modal-submit" class="btn btn-primary animate-breathe">ðŸ—³ Submit Vote</button>
+    </div>
+  </div>
+</div>
+
+<!-- â”€â”€ Simulated MetaMask Connect Popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="metamask-overlay" id="mm-connect-overlay" style="display:none">
+  <div class="metamask-popup" id="mm-connect-popup">
+    <div class="mm-header">
+      <div class="mm-fox-icon">ðŸ¦Š</div>
+      <div class="mm-header-text">
+        <div class="mm-header-title">MetaMask</div>
+        <div class="mm-header-sub">Connect to a site</div>
+      </div>
+    </div>
+    <div class="mm-body">
+      <div class="mm-site-row">
+        <div class="mm-site-icon">ðŸ—³</div>
+        <div>
+          <div class="mm-site-name">Aegis Vote</div>
+          <div class="mm-site-url">localhost:3001</div>
+        </div>
+      </div>
+      <div class="mm-account-row">
+        <div class="mm-account-dot"></div>
+        <div>
+          <div class="mm-account-label">Account 1 Â· Connected</div>
+          <div class="mm-account-addr" id="mm-connect-addr">0x71c7...976f</div>
+        </div>
+      </div>
+      <div class="mm-permissions">
+        <div class="mm-permissions-title">Permissions</div>
+        <div class="mm-perm-item"><span class="mm-perm-check">âœ“</span> View your wallet address</div>
+        <div class="mm-perm-item"><span class="mm-perm-check">âœ“</span> Send you transaction requests</div>
+      </div>
+    </div>
+    <div class="mm-footer">
+      <button class="mm-btn-cancel" id="mm-connect-cancel">Cancel</button>
+      <button class="mm-btn-connect" id="mm-connect-approve">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- â”€â”€ Simulated MetaMask Transaction Popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="metamask-overlay" id="mm-tx-overlay" style="display:none">
+  <div class="metamask-popup" id="mm-tx-popup">
+    <div class="mm-header">
+      <div class="mm-fox-icon">ðŸ¦Š</div>
+      <div class="mm-header-text">
+        <div class="mm-header-title">MetaMask</div>
+        <div class="mm-header-sub">Contract Interaction</div>
+      </div>
+    </div>
+    <div class="mm-body">
+      <div class="mm-site-row">
+        <div class="mm-site-icon">ðŸ—³</div>
+        <div>
+          <div class="mm-site-name">Aegis Vote Â· castVote()</div>
+          <div class="mm-site-url">VotingContract.sol</div>
+        </div>
+      </div>
+      <div class="mm-tx-details">
+        <div class="mm-tx-row">
+          <span class="mm-tx-label">To</span>
+          <span class="mm-tx-value">0x8F3C...7971</span>
+        </div>
+        <div class="mm-tx-row">
+          <span class="mm-tx-label">From</span>
+          <span class="mm-tx-value" id="mm-tx-from">0x71c7...976f</span>
+        </div>
+        <div class="mm-tx-row">
+          <span class="mm-tx-label">Data</span>
+          <span class="mm-tx-value">0x72e89f34...</span>
+        </div>
+      </div>
+      <div class="mm-gas-row">
+        <span class="mm-gas-label">â›½ Estimated gas</span>
+        <span class="mm-gas-value">~0.00042 ETH ($1.09)</span>
+      </div>
+      <div class="mm-warning-banner">
+        <span>â„¹</span>
+        <span>This transaction will permanently record your vote on the Ethereum blockchain. You cannot vote again.</span>
+      </div>
+    </div>
+    <div class="mm-footer">
+      <button class="mm-btn-cancel" id="mm-tx-reject">Reject</button>
+      <button class="mm-btn-connect" id="mm-tx-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { api, getStoredUser, requireAuth, showToast, sanitize, isSimulationMode } from '../js/api.js';
+  import { logout } from '../js/auth.js';
+  import {
+    isMetaMaskInstalled, connectWallet, restoreWalletConnection,
+    verifyWalletOwnership, renderWalletBadge, setupWalletListeners
+  } from '../js/wallet.js';
+  import { loadActiveElection, renderCandidateCards, castVote } from '../js/voting.js';
+
+  if (!requireAuth()) throw new Error('Not authenticated');
+
+  const user = getStoredUser();
+  if (user?.role === 'admin') { window.location.href = 'admin.html'; throw new Error(); }
+
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
+  // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  let walletAddress     = null;
+  let selectedCandidate = null;
+  let electionId        = null;
+
+  function showStep(id) {
+    document.querySelectorAll('.vote-step').forEach((s) => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  }
+
+  function showAlert(msg, type = 'danger') {
+    document.getElementById('alert-area').innerHTML = `
+      <div class="alert alert-${type}">
+        <span class="alert__icon">${type === 'danger' ? 'âš ' : 'â„¹'}</span>
+        <div>${sanitize(msg)}</div>
+      </div>`;
+  }
+
+  // â”€â”€ Simulated MetaMask popups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+  /** Show fake MetaMask "Connect" popup. Resolves on approve, rejects on cancel. */
+  function showSimMetaMaskConnect(walletAddr) {
+    return new Promise((resolve, reject) => {
+      const overlay = document.getElementById('mm-connect-overlay');
+      document.getElementById('mm-connect-addr').textContent =
+        walletAddr ? `${walletAddr.slice(0,6)}...${walletAddr.slice(-4)}` : '0x71c7...976f';
+      overlay.style.display = 'flex';
+
+      function onApprove() { overlay.style.display = 'none'; cleanup(); resolve(); }
+      function onCancel()  { overlay.style.display = 'none'; cleanup(); reject(new Error('Connection rejected')); }
+      function cleanup() {
+        document.getElementById('mm-connect-approve').removeEventListener('click', onApprove);
+        document.getElementById('mm-connect-cancel').removeEventListener('click', onCancel);
+      }
+      document.getElementById('mm-connect-approve').addEventListener('click', onApprove);
+      document.getElementById('mm-connect-cancel').addEventListener('click', onCancel);
+    });
+  }
+
+  /** Show fake MetaMask "Confirm Transaction" popup. Resolves on confirm, rejects on reject. */
+  function showSimMetaMaskTx(walletAddr) {
+    return new Promise((resolve, reject) => {
+      const overlay = document.getElementById('mm-tx-overlay');
+      document.getElementById('mm-tx-from').textContent =
+        walletAddr ? `${walletAddr.slice(0,6)}...${walletAddr.slice(-4)}` : '0x71c7...976f';
+      overlay.style.display = 'flex';
+
+      function onConfirm() { overlay.style.display = 'none'; cleanup(); resolve(); }
+      function onReject()  { overlay.style.display = 'none'; cleanup(); reject(new Error('Transaction rejected in MetaMask')); }
+      function cleanup() {
+        document.getElementById('mm-tx-confirm').removeEventListener('click', onConfirm);
+        document.getElementById('mm-tx-reject').removeEventListener('click', onReject);
+      }
+      document.getElementById('mm-tx-confirm').addEventListener('click', onConfirm);
+      document.getElementById('mm-tx-reject').addEventListener('click', onReject);
+    });
+  }
+
+  // â”€â”€ Preflight checks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  async function runPreflightChecks() {
+    if (user?.hasVoted) {
+      showAlert('You have already cast your vote. Each account may only vote once.', 'info');
+      showStep('step-success');
+      document.getElementById('tx-hash-display').textContent = 'Vote already recorded on blockchain.';
+      return false;
+    }
+
+    let election;
+    try {
+      const data = await loadActiveElection();
+      if (!data.election) { showAlert('There is no active election at this time.', 'info'); return false; }
+      if (data.election.status !== 'active') {
+        showAlert(`This election is currently ${data.election.status}. Voting is not available.`, 'info');
+        return false;
+      }
+      election = data.election;
+      electionId = election._id;
+      document.getElementById('election-title-h').textContent = election.title;
+    } catch (err) {
+      showAlert('Failed to load election: ' + err.message);
+      return false;
+    }
+
+    if (walletAddress) {
+      try {
+        const votedData = await api.get(`/api/blockchain/voted/${walletAddress}`);
+        if (votedData.voted) { showAlert('Your wallet has already voted on the blockchain.', 'info'); return false; }
+      } catch { /* non-critical */ }
+    }
+
+    return election;
+  }
+
+  // â”€â”€ Wallet connection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  async function handleConnect() {
+    try {
+      if (isSimulationMode) {
+        // Show the fake MetaMask connect popup
+        const previewAddr = user?.walletAddress || '0x71c7656ec7ab88b098defb751b7401b5f6d8976f';
+        await showSimMetaMaskConnect(previewAddr);
+      } else if (!isMetaMaskInstalled()) {
+        showAlert('MetaMask is not installed. Please <a href="https://metamask.io" target="_blank">install MetaMask</a> to continue.');
+        return;
+      }
+
+      walletAddress = await connectWallet();
+      const { verified, reason } = verifyWalletOwnership(walletAddress);
+      document.getElementById('wallet-status-nav').innerHTML = renderWalletBadge(walletAddress);
+      document.getElementById('wallet-badge-area').innerHTML = renderWalletBadge(walletAddress);
+
+      if (!verified) { showAlert(reason); return; }
+
+      const election = await runPreflightChecks();
+      if (!election) return;
+
+      await loadCandidates();
+    } catch (err) {
+      showAlert(err.message);
+    }
+  }
+
+  document.getElementById('btn-connect').addEventListener('click', handleConnect);
+
+  // â”€â”€ Candidate loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  async function loadCandidates() {
+    showStep('step-candidates');
+    const container = document.getElementById('candidates-container');
+    container.innerHTML = `<div style="text-align:center;padding:3rem"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+    try {
+      const data = await api.get(`/api/candidates?electionId=${electionId}`);
+      if (!data.candidates || data.candidates.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--c-gray-500)">No candidates found.</p>';
+        return;
+      }
+      renderCandidateCards(container, data.candidates, (candidate) => {
+        selectedCandidate = candidate;
+        const bar = document.getElementById('selection-bar');
+        bar.style.display = 'flex';
+        document.getElementById('selected-name').textContent = candidate.name;
+        document.getElementById('selected-party').textContent = 'ðŸ› ' + candidate.party;
+        document.getElementById('btn-confirm-vote').disabled = false;
+      });
+    } catch (err) {
+      container.innerHTML = `<div class="alert alert-danger"><span class="alert__icon">âš </span><div>${sanitize(err.message)}</div></div>`;
+    }
+  }
+
+  // â”€â”€ Confirm vote button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  document.getElementById('btn-confirm-vote').addEventListener('click', () => {
+    if (!selectedCandidate) return;
+    document.getElementById('modal-candidate-name').textContent = selectedCandidate.name;
+    document.getElementById('modal-candidate-party').textContent = 'ðŸ› ' + selectedCandidate.party;
+    if (selectedCandidate.imageUrl) {
+      document.getElementById('modal-candidate-avatar').innerHTML =
+        `<img src="${sanitize(selectedCandidate.imageUrl)}" style="width:56px;height:56px;border-radius:50%;object-fit:cover" alt="${sanitize(selectedCandidate.name)}">`;
+    }
+    document.getElementById('confirm-modal').style.display = 'flex';
+  });
+
+  document.getElementById('modal-close').addEventListener('click', () => {
+    document.getElementById('confirm-modal').style.display = 'none';
+  });
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    document.getElementById('confirm-modal').style.display = 'none';
+  });
+  document.getElementById('confirm-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) e.currentTarget.style.display = 'none';
+  });
+
+  // â”€â”€ Submit vote â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  document.getElementById('modal-submit').addEventListener('click', async () => {
+    document.getElementById('confirm-modal').style.display = 'none';
+
+    // Show the fake MetaMask transaction approval popup in sim mode
+    if (isSimulationMode) {
+      try {
+        await showSimMetaMaskTx(walletAddress);
+      } catch (err) {
+        showAlert(err.message);
+        return;
+      }
+    }
+
+    showStep('step-tx');
+
+    try {
+      await castVote(selectedCandidate, electionId, {
+        onLoading: (msg) => { document.getElementById('tx-status-msg').textContent = msg; },
+        onSuccess: (hash) => {
+          showStep('step-success');
+          const hashEl = document.getElementById('tx-hash-display');
+          hashEl.textContent = hash;
+          hashEl.style.cursor = 'pointer';
+          hashEl.title = 'Click to copy';
+          hashEl.addEventListener('click', () => {
+            navigator.clipboard.writeText(hash).then(() => showToast('Transaction hash copied!', 'success'));
+          });
+        },
+        onError: (msg) => { showStep('step-candidates'); showAlert(msg); },
+      });
+    } catch (err) {
+      showStep('step-candidates');
+      showAlert(err.message);
+    }
+  });
+
+  // â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  setupWalletListeners({
+    onAccountsChanged: (addr) => {
+      walletAddress = addr;
+      document.getElementById('wallet-status-nav').innerHTML = renderWalletBadge(addr);
+      if (!addr) showStep('step-wallet');
+    },
+  });
+
+  (async () => {
+    walletAddress = await restoreWalletConnection();
+    if (walletAddress) {
+      document.getElementById('wallet-status-nav').innerHTML = renderWalletBadge(walletAddress);
+      const { verified } = verifyWalletOwnership(walletAddress);
+      if (verified) {
+        const election = await runPreflightChecks();
+        if (election) await loadCandidates();
+      } else {
+        showStep('step-wallet');
+        showAlert('Your connected wallet does not match your registered address.');
+      }
+    }
+  })();
+</script>
+</body>
+</html>

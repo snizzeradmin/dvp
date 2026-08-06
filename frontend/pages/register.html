@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — Aegis Vote | Digital Voting Platform</title>
+  <meta name="description" content="Create your Aegis Vote voter account. Register with your ID and Ethereum wallet to participate in secure blockchain elections.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="auth-layout">
+
+  <!-- Left panel — info -->
+  <div class="auth-panel auth-panel--left">
+    <div style="position:relative;z-index:1">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:3rem">
+        <div style="width:44px;height:44px;background:var(--g-primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🗳</div>
+        <span style="font-weight:800;font-size:1.25rem;color:white">Aegis Vote</span>
+      </div>
+      <h2 style="color:white;font-size:1.75rem;line-height:1.3;margin-bottom:1rem">
+        Join the Future of<br>Democratic Voting
+      </h2>
+      <p style="color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:2rem;font-size:0.9rem">
+        Create your secure voter account. Once registered, an administrator will verify your information and authorize your wallet to vote.
+      </p>
+
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1.25rem">
+        <p style="color:rgba(255,255,255,0.5);font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem">What you'll need</p>
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.7);font-size:0.85rem">
+            <span style="color:var(--c-accent)">✓</span> Full name &amp; email address
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.7);font-size:0.85rem">
+            <span style="color:var(--c-accent)">✓</span> Government-issued ID number
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.7);font-size:0.85rem">
+            <span style="color:var(--c-accent)">✓</span> MetaMask wallet (install from metamask.io)
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.7);font-size:0.85rem">
+            <span style="color:var(--c-accent)">✓</span> A secure password (8+ chars, uppercase + number)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel — form -->
+  <div class="auth-panel auth-panel--right" style="overflow-y:auto;max-height:100vh">
+    <div class="auth-form-container" style="margin:0 auto;padding:1rem 0">
+
+      <div class="auth-brand" style="margin-bottom:2rem">
+        <div class="auth-brand-icon">🗳</div>
+        Aegis Vote
+      </div>
+
+      <h1 class="auth-heading">Create your account</h1>
+      <p class="auth-subheading">All fields are required unless marked optional</p>
+
+      <!-- Alert area -->
+      <div id="alert-area" style="margin-bottom:1rem"></div>
+
+      <form id="register-form" novalidate>
+
+        <!-- Full name -->
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-icon">👤</span>
+            <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Jane Doe" autocomplete="name" required>
+          </div>
+          <div class="form-error" id="name-error"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-icon">✉</span>
+            <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+          </div>
+          <div class="form-error" id="email-error"></div>
+        </div>
+
+        <!-- ID Number -->
+        <div class="form-group">
+          <label class="form-label" for="idNumber">Government ID Number <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-icon">🪪</span>
+            <input type="text" id="idNumber" name="idNumber" class="form-input" placeholder="e.g. NIN-1234567890" required>
+          </div>
+          <div class="form-error" id="idNumber-error"></div>
+          <div class="form-hint">National ID, passport number, or equivalent government ID</div>
+        </div>
+
+        <!-- Wallet address -->
+        <div class="form-group">
+          <label class="form-label" for="walletAddress">Ethereum Wallet Address <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-icon">🦊</span>
+            <input type="text" id="walletAddress" name="walletAddress" class="form-input" placeholder="0x..." autocomplete="off" required>
+            <button type="button" class="input-toggle" id="btn-auto-fill" title="Auto-fill from MetaMask" style="font-size:12px;width:auto;padding:0 8px;white-space:nowrap">Auto-fill</button>
+          </div>
+          <div class="form-error" id="walletAddress-error"></div>
+          <div class="form-hint">Must match the wallet you'll use to vote. <a href="https://metamask.io" target="_blank" rel="noopener" style="color:var(--c-primary)">Get MetaMask</a></div>
+        </div>
+
+        <!-- Passwords -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="password">Password <span class="required">*</span></label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="password" name="password" class="form-input" placeholder="Min. 8 characters" autocomplete="new-password" required>
+              <button type="button" class="input-toggle" id="toggle-pw" aria-label="Toggle">👁</button>
+            </div>
+            <div class="form-error" id="password-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">Confirm Password <span class="required">*</span></label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Repeat password" autocomplete="new-password" required>
+            </div>
+            <div class="form-error" id="confirmPassword-error"></div>
+          </div>
+        </div>
+
+        <!-- Password strength indicator -->
+        <div id="pw-strength" style="margin-bottom:1.25rem;display:none">
+          <div style="display:flex;gap:4px;margin-bottom:4px">
+            <div id="str-bar-1" style="flex:1;height:3px;border-radius:4px;background:var(--c-gray-200)"></div>
+            <div id="str-bar-2" style="flex:1;height:3px;border-radius:4px;background:var(--c-gray-200)"></div>
+            <div id="str-bar-3" style="flex:1;height:3px;border-radius:4px;background:var(--c-gray-200)"></div>
+            <div id="str-bar-4" style="flex:1;height:3px;border-radius:4px;background:var(--c-gray-200)"></div>
+          </div>
+          <p id="str-label" style="font-size:0.7rem;color:var(--c-gray-500)"></p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn--full btn--lg" id="submit-btn">
+          Create Voter Account
+        </button>
+      </form>
+
+      <div class="auth-footer" style="margin-top:1.25rem">
+        Already registered? <a href="login.html" id="link-login">Sign in</a>
+      </div>
+
+      <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--c-gray-100)">
+        <a href="../../voting.html" style="color:var(--c-gray-400);font-size:0.8rem;display:flex;align-items:center;gap:0.5rem" id="link-back">
+          ← Back to home
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { register, validateRegistrationForm, displayFieldErrors, clearFieldErrors } from '../js/auth.js';
+  import { redirectTo, showToast, getToken, getStoredUser, isSimulationMode } from '../js/api.js';
+
+  // Already logged in?
+  if (getToken()) {
+    const user = getStoredUser();
+    redirectTo(user?.role === 'admin' ? 'admin.html' : 'dashboard.html');
+  }
+
+  // ── Auto-fill wallet from MetaMask (or generate in sim mode) ───────────────
+  document.getElementById('btn-auto-fill').addEventListener('click', async () => {
+    if (isSimulationMode) {
+      // Generate a realistic-looking random Ethereum wallet address
+      const hex = () => Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
+      const addr = '0x' + [hex(), hex(), hex(), hex(), hex()].join('').slice(0, 40);
+      document.getElementById('walletAddress').value = addr;
+      showToast('Wallet address generated (Demo mode)', 'success');
+      return;
+    }
+    if (!window.ethereum) {
+      showToast('MetaMask is not installed. Please install it first.', 'error');
+      return;
+    }
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      document.getElementById('walletAddress').value = accounts[0];
+      showToast('Wallet address filled from MetaMask', 'success');
+    } catch {
+      showToast('Could not connect MetaMask', 'error');
+    }
+  });
+
+  // ── Password toggle ────────────────────────────────────────────────────────
+  document.getElementById('toggle-pw').addEventListener('click', () => {
+    const pw = document.getElementById('password');
+    const btn = document.getElementById('toggle-pw');
+    const isText = pw.type === 'text';
+    pw.type = isText ? 'password' : 'text';
+    btn.textContent = isText ? '👁' : '🙈';
+  });
+
+  // ── Password strength ──────────────────────────────────────────────────────
+  document.getElementById('password').addEventListener('input', (e) => {
+    const pw = e.target.value;
+    const strDiv = document.getElementById('pw-strength');
+    if (!pw) { strDiv.style.display = 'none'; return; }
+    strDiv.style.display = 'block';
+
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+    const colors = ['', '#ef4444', '#f59e0b', '#3b82f6', '#10b981'];
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+
+    for (let i = 1; i <= 4; i++) {
+      const bar = document.getElementById(`str-bar-${i}`);
+      bar.style.background = i <= score ? colors[score] : 'var(--c-gray-200)';
+    }
+    document.getElementById('str-label').textContent = `Password strength: ${labels[score]}`;
+    document.getElementById('str-label').style.color = colors[score];
+  });
+
+  // ── Form submission ────────────────────────────────────────────────────────
+  const form      = document.getElementById('register-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const alertArea = document.getElementById('alert-area');
+
+  function showAlert(message, type = 'danger') {
+    alertArea.innerHTML = `
+      <div class="alert alert-${type}">
+        <span class="alert__icon">${type === 'danger' ? '⚠' : '✓'}</span>
+        <div class="alert__content">${message}</div>
+      </div>`;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearFieldErrors();
+    alertArea.innerHTML = '';
+
+    const fields = {
+      name:            document.getElementById('name').value.trim(),
+      email:           document.getElementById('email').value.trim(),
+      idNumber:        document.getElementById('idNumber').value.trim(),
+      walletAddress:   document.getElementById('walletAddress').value.trim(),
+      password:        document.getElementById('password').value,
+      confirmPassword: document.getElementById('confirmPassword').value,
+    };
+
+    const { valid, errors } = validateRegistrationForm(fields);
+    if (!valid) {
+      displayFieldErrors(errors);
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="btn__spinner"></div> Creating account...';
+
+    try {
+      await register(fields);
+      showAlert('Account created successfully! Redirecting to your dashboard...', 'success');
+      setTimeout(() => redirectTo('dashboard.html'), 1200);
+    } catch (err) {
+      showAlert(err.message || 'Registration failed. Please try again.');
+      // Handle field-specific errors from backend
+      if (err.errors && err.errors.length > 0) {
+        const fieldErrors = {};
+        err.errors.forEach((e) => { fieldErrors[e.field] = e.message; });
+        displayFieldErrors(fieldErrors);
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Voter Account';
+    }
+  });
+</script>
+</body>
+</html>

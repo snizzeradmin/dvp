@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Aegis Vote | Digital Voting Platform</title>
+  <meta name="description" content="Your Aegis Vote voter dashboard. View active elections, connect your wallet, and access voting.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* Simulated MetaMask popup */
+    .metamask-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .metamask-popup {
+      width: 340px; background: #fff;
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+      animation: slideUp 0.3s cubic-bezier(0.34,1.4,0.64,1);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(30px) scale(0.96); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .mm-header { background:linear-gradient(135deg,#f6851b,#e2761b); padding:1rem 1.25rem; display:flex; align-items:center; gap:.75rem; color:white; }
+    .mm-fox-icon { width:36px;height:36px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0; }
+    .mm-header-title { font-weight:700;font-size:.9rem; }
+    .mm-header-sub   { font-size:.72rem;opacity:.85; }
+    .mm-body { padding:1.25rem; }
+    .mm-site-row { display:flex;align-items:center;gap:.75rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem; }
+    .mm-site-icon { width:36px;height:36px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .mm-site-name { font-weight:700;font-size:.85rem;color:#111; }
+    .mm-site-url  { font-size:.72rem;color:#6b7280; }
+    .mm-account-row { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem; }
+    .mm-account-dot { width:10px;height:10px;background:#22c55e;border-radius:50%;flex-shrink:0; }
+    .mm-account-label { font-size:.72rem;color:#166534;font-weight:600; }
+    .mm-account-addr  { font-size:.75rem;color:#374151;font-family:monospace; }
+    .mm-footer { display:grid;grid-template-columns:1fr 1fr;gap:.75rem;padding:0 1.25rem 1.25rem; }
+    .mm-btn-cancel  { padding:.65rem;border:2px solid #d1d5db;background:white;border-radius:10px;font-weight:600;font-size:.875rem;cursor:pointer;color:#374151;transition:all .15s; }
+    .mm-btn-connect { padding:.65rem;background:linear-gradient(135deg,#f6851b,#e2761b);border:none;border-radius:10px;font-weight:700;font-size:.875rem;cursor:pointer;color:white;transition:all .15s; }
+    .mm-btn-connect:hover { opacity:.9; transform:translateY(-1px); }
+  </style>
+</head>
+<body>
+
+<!-- ── Navbar ─────────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="navbar__inner">
+    <a href="../../voting.html" class="navbar__brand" id="nav-home">
+      <div class="navbar__brand-icon">🗳</div>
+      Aegis Vote
+    </a>
+    <div class="navbar__nav">
+      <a href="dashboard.html" class="navbar__link active" id="nav-dashboard">Dashboard</a>
+      <a href="vote.html" class="navbar__link" id="nav-vote">Vote</a>
+      <a href="results.html" class="navbar__link" id="nav-results">Results</a>
+    </div>
+    <div class="navbar__actions">
+      <div id="wallet-status-nav"></div>
+      <div id="user-menu" style="display:flex;align-items:center;gap:0.75rem">
+        <span id="user-name" style="font-size:0.875rem;font-weight:600;color:var(--c-gray-700)"></span>
+        <button id="btn-logout" class="btn btn-ghost btn--sm">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Main ───────────────────────────────────────────────────────────────────── -->
+<main style="padding-bottom:4rem">
+
+  <!-- Page header -->
+  <div class="page-hero" style="padding:3rem 0 2.5rem">
+    <div class="container">
+      <div class="page-hero__content">
+        <p class="page-hero__eyebrow" id="greeting">Good morning, Voter</p>
+        <h1 class="page-hero__title" style="font-size:2.25rem">Voter Dashboard</h1>
+        <p class="page-hero__subtitle" style="font-size:1rem">Manage your participation in active elections</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:2rem">
+
+    <!-- Status cards grid -->
+    <div class="stats-grid" style="margin-bottom:2rem" id="stats-grid">
+      <div class="stat-card" id="stat-election">
+        <div class="stat-card__value" id="stat-election-val">—</div>
+        <div class="stat-card__label">Active Election</div>
+      </div>
+      <div class="stat-card" id="stat-wallet">
+        <div class="stat-card__value" style="font-size:1.5rem" id="stat-wallet-val">—</div>
+        <div class="stat-card__label">Wallet Status</div>
+      </div>
+      <div class="stat-card" id="stat-vote">
+        <div class="stat-card__value" id="stat-vote-val">—</div>
+        <div class="stat-card__label">Vote Status</div>
+      </div>
+      <div class="stat-card" id="stat-approval">
+        <div class="stat-card__value" id="stat-approval-val">—</div>
+        <div class="stat-card__label">Approval Status</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+
+      <!-- Left: Election info + actions -->
+      <div>
+
+        <!-- Election card -->
+        <div class="card" style="margin-bottom:1.5rem" id="election-card">
+          <div class="card__header" style="display:flex;align-items:center;justify-content:space-between">
+            <h2 style="font-size:1.25rem;font-weight:700;color:var(--c-gray-900)">Current Election</h2>
+            <div id="election-status-badge"></div>
+          </div>
+          <div class="card__body" id="election-body">
+            <div style="text-align:center;padding:2rem">
+              <div class="spinner" style="margin:0 auto"></div>
+              <p style="margin-top:1rem;color:var(--c-gray-500)">Loading election data...</p>
+            </div>
+          </div>
+          <div class="card__footer" id="election-footer" style="display:none">
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+              <a href="vote.html" class="btn btn-primary" id="btn-vote" style="display:none">🗳 Cast Your Vote</a>
+              <a href="results.html" class="btn btn-secondary" id="btn-results" style="display:none">📊 View Results</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div id="alert-area"></div>
+      </div>
+
+      <!-- Right: Wallet panel -->
+      <div>
+
+        <!-- Wallet connection -->
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card__header">
+            <h3 style="font-size:1rem;font-weight:700;color:var(--c-gray-900)">🦊 Wallet Connection</h3>
+          </div>
+          <div class="card__body">
+            <div id="wallet-info" style="margin-bottom:1.25rem"></div>
+            <button id="btn-connect-wallet" class="btn btn-primary btn--full">Connect MetaMask</button>
+            <p style="font-size:0.75rem;color:var(--c-gray-400);margin-top:0.75rem;text-align:center">
+              Your wallet must match your registered address to vote
+            </p>
+          </div>
+        </div>
+
+        <!-- Voting instructions -->
+        <div class="card" style="background:linear-gradient(145deg,#eff6ff,#f0fdf4);border-color:var(--c-gray-200)">
+          <div class="card__body">
+            <h4 style="font-size:0.95rem;font-weight:700;color:var(--c-gray-800);margin-bottom:1rem">📋 How to Vote</h4>
+            <ol style="list-style:decimal;padding-left:1.25rem;display:flex;flex-direction:column;gap:0.6rem">
+              <li style="font-size:0.85rem;color:var(--c-gray-600)">Wait for admin approval of your wallet</li>
+              <li style="font-size:0.85rem;color:var(--c-gray-600)">Connect your MetaMask wallet above</li>
+              <li style="font-size:0.85rem;color:var(--c-gray-600)">Click "Cast Your Vote" when election is active</li>
+              <li style="font-size:0.85rem;color:var(--c-gray-600)">Select a candidate and confirm your choice</li>
+              <li style="font-size:0.85rem;color:var(--c-gray-600)">Approve the MetaMask transaction</li>
+              <li style="font-size:0.85rem;color:var(--c-gray-600)">Save your transaction hash as proof</li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Simulated MetaMask Connect Popup -->
+<div class="metamask-overlay" id="mm-connect-overlay" style="display:none">
+  <div class="metamask-popup">
+    <div class="mm-header">
+      <div class="mm-fox-icon">🦊</div>
+      <div>
+        <div class="mm-header-title">MetaMask</div>
+        <div class="mm-header-sub">Connect to a site</div>
+      </div>
+    </div>
+    <div class="mm-body">
+      <div class="mm-site-row">
+        <div class="mm-site-icon">🗳</div>
+        <div>
+          <div class="mm-site-name">Aegis Vote</div>
+          <div class="mm-site-url">localhost:3001</div>
+        </div>
+      </div>
+      <div class="mm-account-row">
+        <div class="mm-account-dot"></div>
+        <div>
+          <div class="mm-account-label">Account 1 · Connected</div>
+          <div class="mm-account-addr" id="dash-mm-addr">0x71c7...976f</div>
+        </div>
+      </div>
+    </div>
+    <div class="mm-footer">
+      <button class="mm-btn-cancel" id="dash-mm-cancel">Cancel</button>
+      <button class="mm-btn-connect" id="dash-mm-approve">Connect</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { fetchProfile, logout } from '../js/auth.js';
+  import { api, getStoredUser, requireAuth, showToast, sanitize, isSimulationMode } from '../js/api.js';
+  import {
+    isMetaMaskInstalled, connectWallet, restoreWalletConnection,
+    verifyWalletOwnership, formatAddress, setupWalletListeners, renderWalletBadge
+  } from '../js/wallet.js';
+
+  if (!requireAuth()) throw new Error('Not authenticated');
+
+  const user = getStoredUser();
+  if (user?.role === 'admin') {
+    window.location.href = 'admin.html';
+    throw new Error('Admin redirect');
+  }
+
+  // ── Greeting ───────────────────────────────────────────────────────────────
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${greeting}, ${user?.name || 'Voter'}`;
+  document.getElementById('user-name').textContent = user?.name || '';
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  function updateStats(election, walletConnected, walletVerified) {
+    const elVal = document.getElementById('stat-election-val');
+    elVal.textContent = election ? (election.status === 'active' ? '1' : '—') : '0';
+
+    const wVal = document.getElementById('stat-wallet-val');
+    wVal.textContent = walletVerified ? '✓ Verified' : walletConnected ? '⚠ Mismatch' : '✕ Disconnected';
+    wVal.style.color = walletVerified ? 'var(--c-success)' : walletConnected ? 'var(--c-warning)' : 'var(--c-danger)';
+
+    document.getElementById('stat-vote-val').textContent = user?.hasVoted ? '✓ Voted' : 'Not yet';
+    document.getElementById('stat-vote-val').style.color = user?.hasVoted ? 'var(--c-success)' : 'var(--c-gray-500)';
+
+    document.getElementById('stat-approval-val').textContent = user?.isApproved ? '✓ Approved' : 'Pending';
+    document.getElementById('stat-approval-val').style.color = user?.isApproved ? 'var(--c-success)' : 'var(--c-warning)';
+  }
+
+  // ── Election loading ───────────────────────────────────────────────────────
+  let electionData = null;
+
+  async function loadElection() {
+    try {
+      const data = await api.get('/api/elections/active');
+      electionData = data;
+      renderElection(data);
+    } catch (err) {
+      document.getElementById('election-body').innerHTML = `
+        <div class="alert alert-danger">
+          <span class="alert__icon">⚠</span>
+          <div>${err.message}</div>
+        </div>`;
+    }
+  }
+
+  function renderElection(data) {
+    const { election } = data;
+    const body   = document.getElementById('election-body');
+    const footer = document.getElementById('election-footer');
+    const badge  = document.getElementById('election-status-badge');
+
+    if (!election) {
+      body.innerHTML = `
+        <div style="text-align:center;padding:2rem">
+          <div style="font-size:3rem;margin-bottom:1rem">🗳</div>
+          <h3 style="color:var(--c-gray-500);font-weight:500">No Active Election</h3>
+          <p style="color:var(--c-gray-400);font-size:0.875rem;margin-top:0.5rem">Check back later for upcoming elections.</p>
+        </div>`;
+      updateStats(null, false, false);
+      return;
+    }
+
+    const statusColors = { draft: 'badge-gray', active: 'badge-success', ended: 'badge-danger' };
+    badge.innerHTML = `<span class="badge ${statusColors[election.status]} badge-dot">${election.status.toUpperCase()}</span>`;
+
+    body.innerHTML = `
+      <h3 style="font-size:1.35rem;font-weight:700;color:var(--c-gray-900);margin-bottom:0.5rem">${sanitize(election.title)}</h3>
+      <p style="color:var(--c-gray-500);font-size:0.9rem;margin-bottom:1.5rem">${sanitize(election.description || '')}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="status-bar">
+          <div class="status-dot ${election.status === 'active' ? 'active' : 'inactive'}"></div>
+          <span>Status: <strong>${election.status}</strong></span>
+        </div>
+        <div class="status-bar">
+          <div class="status-dot ${user?.isApproved ? 'active' : 'warning'}"></div>
+          <span>Approval: <strong>${user?.isApproved ? 'Approved' : 'Pending'}</strong></span>
+        </div>
+      </div>`;
+
+    footer.style.display = 'block';
+    const btnVote    = document.getElementById('btn-vote');
+    const btnResults = document.getElementById('btn-results');
+
+    if (election.status === 'active') {
+      btnVote.style.display = user?.hasVoted ? 'none' : 'flex';
+      btnResults.style.display = 'flex';
+    } else if (election.status === 'ended') {
+      btnVote.style.display = 'none';
+      btnResults.style.display = 'flex';
+    }
+  }
+
+  // ── Wallet ─────────────────────────────────────────────────────────────────
+  let walletAddress = null;
+
+  function renderWalletPanel(address) {
+    const info    = document.getElementById('wallet-info');
+    const btn     = document.getElementById('btn-connect-wallet');
+    const navBadge = document.getElementById('wallet-status-nav');
+
+    if (!address) {
+      info.innerHTML = `
+        <div class="wallet-badge disconnected" style="margin-bottom:0.75rem">⊗ Not Connected</div>
+        <p style="font-size:0.8rem;color:var(--c-gray-500)">Connect MetaMask to verify your wallet before voting.</p>`;
+      btn.style.display = 'block';
+      navBadge.innerHTML = renderWalletBadge(null);
+      updateStats(electionData?.election, false, false);
+      return;
+    }
+
+    const { verified, reason } = verifyWalletOwnership(address);
+    navBadge.innerHTML = renderWalletBadge(address);
+
+    if (verified) {
+      info.innerHTML = `
+        <div class="wallet-badge connected" style="margin-bottom:0.75rem">◉ ${formatAddress(address)}</div>
+        <p style="font-size:0.8rem;color:var(--c-success);font-weight:600">✓ Wallet verified — matches your registered address</p>`;
+      btn.style.display = 'none';
+    } else {
+      info.innerHTML = `
+        <div class="wallet-badge" style="margin-bottom:0.75rem;background:#fef3c7;color:#92400e;border-color:#fcd34d">⚠ ${formatAddress(address)}</div>
+        <p style="font-size:0.8rem;color:var(--c-danger)">${sanitize(reason)}</p>`;
+      btn.textContent = 'Switch Wallet';
+      btn.style.display = 'block';
+    }
+    updateStats(electionData?.election, true, verified);
+  }
+
+  document.getElementById('btn-connect-wallet').addEventListener('click', async () => {
+    // In simulation mode, show a fake MetaMask popup first
+    if (isSimulationMode) {
+      const addr = getStoredUser()?.walletAddress || '0x71c7656ec7ab88b098defb751b7401b5f6d8976f';
+      document.getElementById('dash-mm-addr').textContent =
+        `${addr.slice(0,6)}...${addr.slice(-4)}`;
+      document.getElementById('mm-connect-overlay').style.display = 'flex';
+
+      await new Promise((resolve, reject) => {
+        function onApprove() { document.getElementById('mm-connect-overlay').style.display='none'; cleanup(); resolve(); }
+        function onCancel()  { document.getElementById('mm-connect-overlay').style.display='none'; cleanup(); reject(new Error('Connection cancelled')); }
+        function cleanup() {
+          document.getElementById('dash-mm-approve').removeEventListener('click', onApprove);
+          document.getElementById('dash-mm-cancel').removeEventListener('click', onCancel);
+        }
+        document.getElementById('dash-mm-approve').addEventListener('click', onApprove);
+        document.getElementById('dash-mm-cancel').addEventListener('click', onCancel);
+      }).catch((err) => { showToast(err.message, 'error'); return; });
+    } else if (!isMetaMaskInstalled()) {
+      document.getElementById('alert-area').innerHTML = `
+        <div class="alert alert-warning">
+          <span class="alert__icon">⚠</span>
+          <div class="alert__content">
+            <div class="alert__title">MetaMask Required</div>
+            <p>Please <a href="https://metamask.io" target="_blank" style="color:inherit;font-weight:700">install MetaMask</a> to connect your wallet.</p>
+          </div>
+        </div>`;
+      return;
+    }
+    try {
+      walletAddress = await connectWallet();
+      renderWalletPanel(walletAddress);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+
+  setupWalletListeners({
+    onAccountsChanged: (addr) => { walletAddress = addr; renderWalletPanel(addr); },
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  (async () => {
+    await loadElection();
+    try {
+      const profile = await fetchProfile();
+      // Refresh local user
+    } catch { /* non-critical */ }
+
+    walletAddress = await restoreWalletConnection();
+    renderWalletPanel(walletAddress);
+  })();
+</script>
+</body>
+</html>

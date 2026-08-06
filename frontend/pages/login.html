@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — Aegis Vote | Digital Voting Platform</title>
+  <meta name="description" content="Sign in to your Aegis Vote voter account to access active elections and cast your vote.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="auth-layout">
+
+  <!-- Left panel — brand -->
+  <div class="auth-panel auth-panel--left">
+    <div style="position:relative;z-index:1">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:3rem">
+        <div style="width:44px;height:44px;background:var(--g-primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🗳</div>
+        <span style="font-weight:800;font-size:1.25rem;color:white">Aegis Vote</span>
+      </div>
+      <h2 style="color:white;font-size:2rem;line-height:1.2;margin-bottom:1rem">
+        Your Vote.<br>Your Voice.<br>Your Right.
+      </h2>
+      <p style="color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:2.5rem">
+        Sign in to access active elections and cast your blockchain-verified vote with confidence.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.6);font-size:0.875rem">
+          <span style="color:var(--c-accent);font-size:1.1rem">🔒</span> Bank-grade security
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.6);font-size:0.875rem">
+          <span style="color:var(--c-accent);font-size:1.1rem">⛓</span> Blockchain-backed integrity
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.6);font-size:0.875rem">
+          <span style="color:var(--c-accent);font-size:1.1rem">✓</span> Tamper-proof vote record
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel — form -->
+  <div class="auth-panel auth-panel--right">
+    <div class="auth-form-container" style="margin:0 auto">
+
+      <div class="auth-brand" style="margin-bottom:2.5rem">
+        <div class="auth-brand-icon">🗳</div>
+        Aegis Vote
+      </div>
+
+      <h1 class="auth-heading">Welcome back</h1>
+      <p class="auth-subheading">Enter your credentials to access your voter account</p>
+
+      <!-- Alert area -->
+      <div id="alert-area" style="margin-bottom:1rem"></div>
+
+      <form id="login-form" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email address <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-icon">✉</span>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+          </div>
+          <div class="form-error" id="email-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password <span class="required">*</span></label>
+          <div class="input-group">
+            <span class="input-icon">🔑</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+            <button type="button" class="input-toggle" id="toggle-password" aria-label="Toggle password visibility">👁</button>
+          </div>
+          <div class="form-error" id="password-error"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn--full btn--lg" id="submit-btn" style="margin-top:0.5rem">
+          Sign In
+        </button>
+      </form>
+
+      <div class="auth-divider">or</div>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html" id="link-register">Register to vote</a>
+      </div>
+
+      <div class="auth-footer" style="margin-top:0.75rem">
+        Administrator? <a href="admin.html" id="link-admin">Admin Portal →</a>
+      </div>
+
+      <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--c-gray-100)">
+        <!-- Demo credentials box -->
+        <div style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem">
+          <p style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:#1d4ed8;margin-bottom:0.75rem">🔐 Demo Credentials</p>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <button type="button" id="demo-voter-btn" style="text-align:left;padding:0.5rem 0.75rem;background:white;border:1px solid #dbeafe;border-radius:8px;cursor:pointer;font-size:0.78rem;transition:all 0.15s" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
+              <span style="font-weight:700;color:#1d4ed8">🗳 Voter:</span> <span style="color:#374151">use any registered email + any password</span>
+            </button>
+            <button type="button" id="demo-admin-btn" style="text-align:left;padding:0.5rem 0.75rem;background:white;border:1px solid #dcfce7;border-radius:8px;cursor:pointer;font-size:0.78rem;transition:all 0.15s" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'">
+              <span style="font-weight:700;color:#166534">👨‍💼 Admin:</span> <span style="color:#374151">admin@dvp.gov / Admin@SecureVoting2026!</span>
+            </button>
+          </div>
+        </div>
+        <a href="../../voting.html" style="color:var(--c-gray-400);font-size:0.8rem;display:flex;align-items:center;gap:0.5rem" id="link-back">
+          ← Back to home
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { login } from '../js/auth.js';
+  import { redirectTo, getStoredUser, getToken } from '../js/api.js';
+
+  // Already logged in?
+  if (getToken()) {
+    const user = getStoredUser();
+    redirectTo(user?.role === 'admin' ? 'admin.html' : 'dashboard.html');
+  }
+
+  const form       = document.getElementById('login-form');
+  const submitBtn  = document.getElementById('submit-btn');
+  const alertArea  = document.getElementById('alert-area');
+  const toggleBtn  = document.getElementById('toggle-password');
+  const pwInput    = document.getElementById('password');
+
+  // Demo credential quick-fill buttons
+  document.getElementById('demo-voter-btn')?.addEventListener('click', () => {
+    document.getElementById('email').value = 'voter@dvp.gov';
+    document.getElementById('password').value = 'Demo1234';
+    alertArea.innerHTML = '<div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.6rem 1rem;font-size:0.8rem;color:#166534">ℹ Demo voter credentials filled. Click Sign In.</div>';
+  });
+  document.getElementById('demo-admin-btn')?.addEventListener('click', () => {
+    document.getElementById('email').value = 'admin@dvp.gov';
+    document.getElementById('password').value = 'Admin@SecureVoting2026!';
+    alertArea.innerHTML = '<div class="alert" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.6rem 1rem;font-size:0.8rem;color:#166534">ℹ Admin credentials filled. Click Sign In.</div>';
+  });
+
+  // Password visibility toggle
+  toggleBtn.addEventListener('click', () => {
+    const isText = pwInput.type === 'text';
+    pwInput.type = isText ? 'password' : 'text';
+    toggleBtn.textContent = isText ? '👁' : '🙈';
+  });
+
+  function showAlert(message, type = 'danger') {
+    alertArea.innerHTML = `
+      <div class="alert alert-${type}">
+        <span class="alert__icon">${type === 'danger' ? '⚠' : 'ℹ'}</span>
+        <div class="alert__content">${message}</div>
+      </div>`;
+  }
+
+  function clearErrors() {
+    alertArea.innerHTML = '';
+    document.querySelectorAll('.form-error').forEach((el) => (el.textContent = ''));
+    document.querySelectorAll('.form-input.error').forEach((el) => el.classList.remove('error'));
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    // Basic client-side validation
+    let hasError = false;
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      document.getElementById('email').classList.add('error');
+      document.getElementById('email-error').textContent = 'Please enter a valid email address';
+      hasError = true;
+    }
+    if (!password) {
+      document.getElementById('password').classList.add('error');
+      document.getElementById('password-error').textContent = 'Password is required';
+      hasError = true;
+    }
+    if (hasError) return;
+
+    // Submit
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="btn__spinner"></div> Signing in...';
+
+    try {
+      const data = await login(email, password);
+      showAlert('Login successful! Redirecting...', 'success');
+
+      setTimeout(() => {
+        if (data.user.role === 'admin') {
+          redirectTo('admin.html');
+        } else {
+          redirectTo('dashboard.html');
+        }
+      }, 800);
+    } catch (err) {
+      showAlert(err.message || 'Login failed. Please check your credentials.');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In';
+    }
+  });
+</script>
+</body>
+</html>
