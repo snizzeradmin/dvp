@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="manifest.json">
+    <!-- manifest omitted: only works when served via HTTP, not file:// -->
     <title>DrugVerify NG</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
@@ -25,6 +25,7 @@
             --green: #16a34a;
             --green-light: #dcfce7;
             --green-dark: #14532d;
+            --green-mid: #15803d;
             --red: #dc2626;
             --red-light: #fee2e2;
             --amber: #d97706;
@@ -44,8 +45,9 @@
             --white: #ffffff;
             --radius: 14px;
             --radius-sm: 8px;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 6px 20px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05);
+            --shadow-lg: 0 16px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
             --font: 'DM Sans', sans-serif;
             --mono: 'DM Mono', monospace;
         }
@@ -144,8 +146,10 @@
 
         #bottom-nav {
             height: 64px;
-            background: var(--white);
-            border-top: 1px solid var(--gray-200);
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(0,0,0,0.07);
             display: flex;
             align-items: stretch;
             position: absolute;
@@ -205,7 +209,7 @@
 
         .card {
             background: var(--white);
-            border: 1px solid var(--gray-200);
+            border: 1px solid rgba(0,0,0,0.07);
             border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--shadow);
@@ -902,35 +906,63 @@
         }
 
         .home-hero {
-            background: var(--green);
-            padding: 20px;
+            background: linear-gradient(135deg, #15803d 0%, #16a34a 60%, #22c55e 100%);
+            padding: 24px 20px 22px;
             color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-hero::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .home-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: 40px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
         }
 
         .home-hero-title {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
         }
 
         .home-hero-sub {
             font-size: 13px;
-            opacity: 0.8;
-            margin-top: 3px;
+            opacity: 0.82;
+            margin-top: 4px;
         }
 
         .home-hero-stat {
-            margin-top: 16px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: var(--radius-sm);
-            padding: 12px 14px;
+            margin-top: 18px;
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: var(--radius);
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .hero-stat-num {
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .hero-stat-label {
@@ -940,7 +972,7 @@
         }
 
         .home-content {
-            padding: 16px 20px 20px;
+            padding: 18px 20px 20px;
         }
 
         .quick-actions {
@@ -1166,11 +1198,732 @@
             flex-shrink: 0;
             margin-top: 1px;
         }
+
+        /* ── Auth Screen ─────────────────────────────── */
+        #auth-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(160deg, #0f4c2a 0%, #166534 40%, #16a34a 100%);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #auth-screen.hidden {
+            display: none;
+        }
+
+        .auth-bg-circles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .auth-bg-circles span {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .auth-bg-circles span:nth-child(1) {
+            width: 280px; height: 280px;
+            top: -80px; right: -60px;
+        }
+
+        .auth-bg-circles span:nth-child(2) {
+            width: 160px; height: 160px;
+            top: 180px; left: -50px;
+        }
+
+        .auth-bg-circles span:nth-child(3) {
+            width: 100px; height: 100px;
+            bottom: 240px; right: 20px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .auth-logo-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px 32px;
+            flex-shrink: 0;
+        }
+
+        .auth-logo-icon {
+            width: 72px;
+            height: 72px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .auth-logo-icon svg {
+            width: 38px;
+            height: 38px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .auth-app-name {
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-app-tagline {
+            font-size: 14px;
+            color: rgba(255,255,255,0.72);
+            margin-top: 4px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 24px 24px 0 0;
+            flex: 1;
+            padding: 32px 24px 40px;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 9px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-500);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: var(--font);
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--green);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: authFadeIn 0.25s ease;
+        }
+
+        @keyframes authFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-field {
+            margin-bottom: 16px;
+        }
+
+        .auth-field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .auth-input-wrap {
+            position: relative;
+        }
+
+        .auth-input-wrap svg {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 17px;
+            height: 17px;
+            stroke: var(--gray-400);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+        }
+
+        .auth-input-wrap input {
+            width: 100%;
+            font-family: var(--font);
+            font-size: 15px;
+            padding: 12px 14px 12px 40px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            outline: none;
+            transition: border-color 0.15s, background 0.15s;
+            appearance: none;
+        }
+
+        .auth-input-wrap input:focus {
+            border-color: var(--green);
+            background: white;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            color: white;
+            font-family: var(--font);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 16px rgba(22,163,74,0.35);
+            transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+            letter-spacing: 0.01em;
+        }
+
+        .auth-btn:active {
+            opacity: 0.9;
+            transform: scale(0.985);
+            box-shadow: 0 2px 8px rgba(22,163,74,0.25);
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: var(--gray-400);
+            font-size: 13px;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--gray-200);
+        }
+
+        .auth-google-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 12px;
+            background: white;
+            color: var(--gray-700);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .auth-google-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .auth-terms {
+            font-size: 12px;
+            color: var(--gray-400);
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .auth-terms a {
+            color: var(--green);
+            text-decoration: none;
+        }
+
+        .auth-loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Quick action hover glow ─────────────────── */
+        .quick-action:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .quick-action {
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+
+        /* ── AI Chat ─────────────────────────────────────── */
+        .ai-fab {
+            position: absolute;
+            bottom: 80px;
+            right: 18px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 24px rgba(22,163,74,0.45), 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 150;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fabPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both;
+        }
+
+        @keyframes fabPop {
+            from { transform: scale(0); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
+        .ai-fab:active {
+            transform: scale(0.92);
+        }
+
+        .ai-fab svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .ai-fab-pulse {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(22,163,74,0.4);
+            animation: fabRing 2s ease-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fabRing {
+            0%   { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        #ai-chat-panel {
+            position: absolute;
+            inset: 0;
+            bottom: 64px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            background: #f8faf9;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+            pointer-events: none;
+        }
+
+        #ai-chat-panel.open {
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .ai-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px 12px;
+            background: white;
+            border-bottom: 1px solid var(--gray-100);
+            flex-shrink: 0;
+        }
+
+        .ai-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .ai-avatar svg {
+            width: 20px;
+            height: 20px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .ai-header-info { flex: 1; }
+
+        .ai-header-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .ai-header-status {
+            font-size: 12px;
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 1px;
+        }
+
+        .ai-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            flex-shrink: 0;
+        }
+
+        .ai-close-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .ai-close-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--gray-600);
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        #ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .ai-msg {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            animation: msgIn 0.2s ease;
+        }
+
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-msg.user {
+            flex-direction: row-reverse;
+        }
+
+        .ai-msg-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .ai-msg-avatar svg {
+            width: 15px;
+            height: 15px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .ai-bubble {
+            max-width: 80%;
+            padding: 10px 13px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--gray-900);
+            background: white;
+            border: 1px solid var(--gray-100);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .ai-msg.user .ai-bubble {
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            color: white;
+            border: none;
+            border-radius: 16px 16px 4px 16px;
+        }
+
+        .ai-msg.bot .ai-bubble {
+            border-radius: 16px 16px 16px 4px;
+        }
+
+        .ai-typing {
+            display: flex;
+            gap: 5px;
+            padding: 12px 14px;
+            align-items: center;
+        }
+
+        .ai-typing span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--gray-400);
+            animation: typingDot 1.2s ease-in-out infinite;
+        }
+
+        .ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-5px); opacity: 1; }
+        }
+
+        .ai-quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            padding: 6px 0 2px;
+        }
+
+        .ai-quick-chip {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 13px;
+            border-radius: 100px;
+            border: 1.5px solid var(--green);
+            background: white;
+            color: var(--green);
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        .ai-quick-chip:active {
+            background: var(--green);
+            color: white;
+        }
+
+        .ai-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px 14px 12px;
+            background: white;
+            border-top: 1px solid var(--gray-100);
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        #ai-input {
+            flex: 1;
+            font-family: var(--font);
+            font-size: 14px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 22px;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            outline: none;
+            resize: none;
+            line-height: 1.4;
+            max-height: 100px;
+            transition: border-color 0.15s;
+        }
+
+        #ai-input:focus {
+            border-color: var(--green);
+            background: white;
+        }
+
+        .ai-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #15803d, #16a34a);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(22,163,74,0.3);
+            transition: transform 0.15s, opacity 0.15s;
+        }
+
+        .ai-send-btn:active { transform: scale(0.9); }
+
+        .ai-send-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
     </style>
 </head>
 
 <body>
     <div id="app">
+
+        <!-- ── Auth Screen ──────────────────────────── -->
+        <div id="auth-screen">
+            <div class="auth-bg-circles">
+                <span></span><span></span><span></span>
+            </div>
+
+            <div class="auth-logo-wrap">
+                <div class="auth-logo-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4" />
+                        <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" />
+                    </svg>
+                </div>
+                <div class="auth-app-name">DrugVerify NG</div>
+                <div class="auth-app-tagline">NAFDAC-integrated drug authentication</div>
+            </div>
+
+            <div class="auth-card">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+                    <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+                </div>
+
+                <!-- Login Form -->
+                <div class="auth-form active" id="form-login">
+                    <div class="auth-field">
+                        <label for="login-email">Email address</label>
+                        <div class="auth-input-wrap">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input type="text" id="login-email" placeholder="you@example.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="login-password">Password</label>
+                        <div class="auth-input-wrap">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password">
+                        </div>
+                    </div>
+                    <button class="auth-btn" id="login-btn" onclick="handleLogin()">Sign In</button>
+
+                    <div class="auth-divider">or</div>
+
+                    <button class="auth-google-btn" onclick="handleLogin()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div class="auth-terms">
+                        By signing in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </div>
+                </div>
+
+                <!-- Signup Form -->
+                <div class="auth-form" id="form-signup">
+                    <div class="auth-field">
+                        <label for="signup-name">Full name</label>
+                        <div class="auth-input-wrap">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            <input type="text" id="signup-name" placeholder="Adaeze Okonkwo" autocomplete="name">
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="signup-email">Email address</label>
+                        <div class="auth-input-wrap">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input type="text" id="signup-email" placeholder="you@example.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label for="signup-password">Password</label>
+                        <div class="auth-input-wrap">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" id="signup-password" placeholder="Create a password" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <button class="auth-btn" id="signup-btn" onclick="handleSignup()">Create Account</button>
+
+                    <div class="auth-divider">or</div>
+
+                    <button class="auth-google-btn" onclick="handleSignup()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84z" fill="#EA4335"/>
+                        </svg>
+                        Sign up with Google
+                    </button>
+
+                    <div class="auth-terms">
+                        By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ── End Auth Screen ─────────────────────── -->
 
         <div class="screen active" id="home-screen">
             <div class="topbar">
@@ -1701,9 +2454,113 @@
 
         <div class="toast" id="toast"></div>
 
+        <!-- ── AI Chat FAB ──────────────────────────────── -->
+        <button class="ai-fab" id="ai-fab" onclick="openAIChat()" aria-label="Ask AI Assistant">
+            <div class="ai-fab-pulse"></div>
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a9.96 9.96 0 0 1-5-1.34L2 22l1.34-5A9.96 9.96 0 0 1 2 12 10 10 0 0 1 12 2z"/>
+                <path d="M8 10h.01M12 10h.01M16 10h.01" stroke-width="2.5"/>
+            </svg>
+        </button>
+
+        <!-- ── AI Chat Panel ────────────────────────────── -->
+        <div id="ai-chat-panel">
+            <div class="ai-chat-header">
+                <div class="ai-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a9.96 9.96 0 0 1-5-1.34L2 22l1.34-5A9.96 9.96 0 0 1 2 12 10 10 0 0 1 12 2z"/></svg>
+                </div>
+                <div class="ai-header-info">
+                    <div class="ai-header-name">VerifyAI</div>
+                    <div class="ai-header-status"><span class="ai-status-dot"></span> Online · Drug Intelligence</div>
+                </div>
+                <button class="ai-close-btn" onclick="closeAIChat()" aria-label="Close chat">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <div id="ai-messages"></div>
+
+            <div class="ai-input-row">
+                <textarea id="ai-input" placeholder="Ask about a drug, NAFDAC, safety…" rows="1"
+                    onkeydown="aiInputKeydown(event)" oninput="aiInputResize(this)"></textarea>
+                <button class="ai-send-btn" onclick="aiSend()" aria-label="Send">
+                    <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
+        // ── Auth Logic ──────────────────────────────────────
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('form-' + tab).classList.add('active');
+        }
+
+        function setAuthBtnLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (loading) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="auth-loading"></span>';
+            } else {
+                btn.disabled = false;
+                btn.textContent = btnId === 'login-btn' ? 'Sign In' : 'Create Account';
+            }
+        }
+
+        function dismissAuth() {
+            document.getElementById('auth-screen').classList.add('hidden');
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) {
+                shakeField('login-email');
+                return;
+            }
+            setAuthBtnLoading('login-btn', true);
+            setTimeout(() => {
+                setAuthBtnLoading('login-btn', false);
+                dismissAuth();
+            }, 1200);
+        }
+
+        function handleSignup() {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            if (!name || !email || !password) {
+                shakeField('signup-email');
+                return;
+            }
+            setAuthBtnLoading('signup-btn', true);
+            setTimeout(() => {
+                setAuthBtnLoading('signup-btn', false);
+                dismissAuth();
+            }, 1400);
+        }
+
+        function shakeField(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.style.borderColor = 'var(--red)';
+            el.style.animation = 'none';
+            el.offsetHeight; // reflow
+            el.style.animation = 'shake 0.35s ease';
+            if (!document.getElementById('shake-style')) {
+                const s = document.createElement('style');
+                s.id = 'shake-style';
+                s.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}';
+                document.head.appendChild(s);
+            }
+            setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
+        }
+        // ── End Auth Logic ──────────────────────────────────
+
         const DRUGS = [{
                 id: 'A7-9812-LMC',
                 name: 'Lonart DS Tablets',
@@ -2275,6 +3132,236 @@
             badge.style.display = 'block';
             badge.textContent = reportCount;
         }
+
+        // ── AI Chat ──────────────────────────────────────────
+        const AI_RESPONSES = [
+            {
+                match: /(lonart|artemether|lumefantrine)/i,
+                reply: '**Lonart DS** (Artemether + Lumefantrine) is a first-line antimalarial registered by NAFDAC under code **A7-9812-LMC**.\n\nManufactured by Bliss GVS Pharma Ltd. Always check the hologram seal and expiry date before use.',
+                chips: ['How do I verify it?', 'What are side effects?', 'Is it genuine?']
+            },
+            {
+                match: /(augmentin|amoxicillin|clavulanate|gsk)/i,
+                reply: '**Augmentin 625mg** by GlaxoSmithKline Nigeria is an antibiotic registered under **C1-3309-GSK**.\n\nContains Amoxicillin 500mg + Clavulanate 125mg. Requires a prescription. Do not self-medicate with antibiotics.',
+                chips: ['Check NAFDAC code', 'Antibiotic resistance?', 'Where to buy safely?']
+            },
+            {
+                match: /(fake|counterfeit|suspicious|not real)/i,
+                reply: '\u26a0\ufe0f If you suspect a counterfeit drug, **do not take it**. Here\'s what to do:\n\n1. Scan the NAFDAC code in the Scan tab\n2. If unverified, use the **Report Fake** feature\n3. Contact NAFDAC directly: **+234-1-3432524**\n\nYour report is anonymous and confidential.',
+                chips: ['Report it now', 'NAFDAC hotline', 'How to spot fakes?']
+            },
+            {
+                match: /(nafdac|register|registration|approved)/i,
+                reply: 'NAFDAC (National Agency for Food and Drug Administration and Control) regulates all drugs in Nigeria.\n\nA valid NAFDAC number follows the format **XX-NNNN-ABC**. You can verify any number instantly using the **Scan** or **Registry** tab in this app.',
+                chips: ['Open Drug Registry', 'Scan a drug', 'What is NAFDAC?']
+            },
+            {
+                match: /(side effect|danger|safe|harm|risk)/i,
+                reply: 'Drug safety depends on the specific medication. For accurate side effect info:\n\n- Always read the package insert\n- Consult a licensed pharmacist\n- Check the manufacturer\'s official site\n\nWould you like me to look up a specific drug for you?',
+                chips: ['Look up a drug', 'Find a pharmacist', 'Common drug interactions']
+            },
+            {
+                match: /(paracetamol|emzor|tylenol|fever|pain)/i,
+                reply: '**Emzor Paracetamol 500mg** (NAFDAC: **D2-4401-EMZ**) is widely used for fever and mild pain relief.\n\nDose: 1–2 tablets every 4–6 hours. Do not exceed 8 tablets/day. Avoid alcohol. Safe for adults and children (age-appropriate doses).',
+                chips: ['Verify Emzor code', 'Children dosage?', 'Drug interactions']
+            },
+            {
+                match: /(coartem|novartis|malaria|artemether)/i,
+                reply: '**Coartem 20/120mg** by Novartis is an WHO-prequalified antimalarial (NAFDAC: **E5-7723-NFT**).\n\nTake with food or a glass of milk for better absorption. Full 3-day course must be completed even if feeling better.',
+                chips: ['Verify Coartem code', 'Malaria prevention?', 'Other antimalarials']
+            },
+            {
+                match: /(hello|hi|hey|good morning|good evening|hiya)/i,
+                reply: 'Hello! \ud83d\udc4b I\'m **VerifyAI**, your drug intelligence assistant powered by DrugVerify NG.\n\nI can help you:\n- Verify drug authenticity\n- Explain NAFDAC codes\n- Answer drug safety questions\n- Guide you on reporting fakes\n\nWhat would you like to know?',
+                chips: ['Verify a drug', 'Report a fake', 'Drug safety tips']
+            },
+            {
+                match: /(verify|check|scan|authentic|genuine|real)/i,
+                reply: 'To verify a drug with DrugVerify NG:\n\n1. **Scan** — Use your camera to scan the QR/barcode on the packaging\n2. **Manual** — Type the NAFDAC number directly in the Scan tab\n3. **Registry** — Browse the full NAFDAC drug database\n\nAll results are cross-referenced with the NAFDAC live registry.',
+                chips: ['Open Scanner', 'Try demo code', 'Browse Registry']
+            },
+            {
+                match: /(ibuprofen|brufen|nsaid|inflammation)/i,
+                reply: '**Ibuprofen 400mg** by Emzor (NAFDAC: **M3-7741-IBU**) is an NSAID used for pain, fever and inflammation.\n\nTake with food to reduce stomach upset. Not recommended for people with kidney issues or those on blood thinners without medical advice.',
+                chips: ['Verify this drug', 'Paracetamol vs Ibuprofen?', 'Drug interactions']
+            },
+        ];
+
+        const AI_FALLBACKS = [
+            'I don\'t have specific data on that yet, but you can verify any drug using the **Scan** or **Registry** tab. Would you like me to walk you through it?',
+            'Great question! For the most accurate and up-to-date info, use the **Drug Registry** tab to search the full NAFDAC database. I can also help you understand what to look for.',
+            'I\'m still learning about that specific topic. In the meantime, consider checking the NAFDAC website or calling their hotline: **+234-1-3432524**. Can I help with something else?',
+            'That\'s outside my current knowledge base. For drug-specific questions, always consult a licensed pharmacist or healthcare provider. Want tips on identifying counterfeit drugs instead?'
+        ];
+
+        const QUICK_CHIPS_ACTIONS = {
+            'Verify a drug': 'How do I verify a drug?',
+            'Report a fake': 'What do I do if I find a fake drug?',
+            'Drug safety tips': 'Give me drug safety tips',
+            'How do I verify it?': 'How can I verify a drug?',
+            'What are side effects?': 'What are common drug side effects I should watch for?',
+            'Is it genuine?': 'How can I tell if a drug is genuine?',
+            'Report it now': 'How do I report a counterfeit drug?',
+            'NAFDAC hotline': 'What is the NAFDAC hotline number?',
+            'How to spot fakes?': 'How do I spot a fake or counterfeit drug?',
+            'Open Scanner': 'How do I use the scanner?',
+            'Browse Registry': 'How do I use the drug registry?',
+            'Open Drug Registry': 'Tell me about the drug registry',
+            'Scan a drug': 'How do I scan a drug?',
+            'Check NAFDAC code': 'How do I check a NAFDAC code?',
+            'Verify Emzor code': 'How do I verify Emzor Paracetamol?',
+            'Children dosage?': 'What is the correct paracetamol dosage for children?',
+            'Paracetamol vs Ibuprofen?': 'What is the difference between paracetamol and ibuprofen?',
+        };
+
+        let aiChatOpen = false;
+        let aiTyping = false;
+
+        function openAIChat() {
+            const panel = document.getElementById('ai-chat-panel');
+            panel.classList.add('open');
+            aiChatOpen = true;
+            const msgs = document.getElementById('ai-messages');
+            if (msgs.children.length === 0) {
+                setTimeout(() => addBotMessage(
+                    'Hi there! \ud83d\udc4b I\'m **VerifyAI**, your drug safety assistant.\n\nAsk me anything about drugs, NAFDAC codes, or how to spot fakes!',
+                    ['Verify a drug', 'Report a fake', 'Drug safety tips']
+                ), 400);
+            }
+            setTimeout(() => document.getElementById('ai-input').focus(), 350);
+        }
+
+        function closeAIChat() {
+            document.getElementById('ai-chat-panel').classList.remove('open');
+            aiChatOpen = false;
+        }
+
+        function addBotMessage(text, chips = []) {
+            const msgs = document.getElementById('ai-messages');
+            const wrap = document.createElement('div');
+            wrap.className = 'ai-msg bot';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'ai-msg-avatar';
+            avatar.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a9.96 9.96 0 0 1-5-1.34L2 22l1.34-5A9.96 9.96 0 0 1 2 12 10 10 0 0 1 12 2z"/></svg>';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-bubble';
+            bubble.innerHTML = formatAIText(text);
+
+            if (chips.length) {
+                const chipRow = document.createElement('div');
+                chipRow.className = 'ai-quick-replies';
+                chips.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.className = 'ai-quick-chip';
+                    btn.textContent = c;
+                    btn.onclick = () => { aiSendText(QUICK_CHIPS_ACTIONS[c] || c); };
+                    chipRow.appendChild(btn);
+                });
+                bubble.appendChild(chipRow);
+            }
+
+            wrap.appendChild(avatar);
+            wrap.appendChild(bubble);
+            msgs.appendChild(wrap);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function addUserMessage(text) {
+            const msgs = document.getElementById('ai-messages');
+            const wrap = document.createElement('div');
+            wrap.className = 'ai-msg user';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-bubble';
+            bubble.textContent = text;
+
+            wrap.appendChild(bubble);
+            msgs.appendChild(wrap);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const msgs = document.getElementById('ai-messages');
+            const indicator = document.createElement('div');
+            indicator.className = 'ai-msg bot';
+            indicator.id = 'ai-typing-indicator';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'ai-msg-avatar';
+            avatar.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a9.96 9.96 0 0 1-5-1.34L2 22l1.34-5A9.96 9.96 0 0 1 2 12 10 10 0 0 1 12 2z"/></svg>';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-bubble';
+            bubble.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+
+            indicator.appendChild(avatar);
+            indicator.appendChild(bubble);
+            msgs.appendChild(indicator);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const el = document.getElementById('ai-typing-indicator');
+            if (el) el.remove();
+        }
+
+        function formatAIText(text) {
+            return text
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function getAIReply(input) {
+            const lower = input.toLowerCase();
+            for (const r of AI_RESPONSES) {
+                if (r.match.test(lower)) return r;
+            }
+            // fallback
+            return {
+                reply: AI_FALLBACKS[Math.floor(Math.random() * AI_FALLBACKS.length)],
+                chips: ['Verify a drug', 'Report a fake', 'NAFDAC hotline']
+            };
+        }
+
+        function aiSendText(text) {
+            if (!text.trim() || aiTyping) return;
+            addUserMessage(text);
+            aiTyping = true;
+
+            const delay = 800 + Math.random() * 700;
+            showTypingIndicator();
+
+            setTimeout(() => {
+                removeTypingIndicator();
+                const { reply, chips } = getAIReply(text);
+                addBotMessage(reply, chips || []);
+                aiTyping = false;
+            }, delay);
+        }
+
+        function aiSend() {
+            const input = document.getElementById('ai-input');
+            const text = input.value.trim();
+            if (!text || aiTyping) return;
+            input.value = '';
+            input.style.height = '';
+            aiSendText(text);
+        }
+
+        function aiInputKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                aiSend();
+            }
+        }
+
+        function aiInputResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+        }
+        // ── End AI Chat ──────────────────────────────────────
     </script>
 </body>
 
