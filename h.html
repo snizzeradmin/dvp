@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>Alaafia — Maternal Protection</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,340..600&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg: #FAFAF7;
+    --bg-panel: #F1EFEA;
+    --card: #FFFFFF;
+    --ink: #191A22;
+    --ink-soft: #63656F;
+    --ink-faint: #9496A0;
+    --indigo: #262F5C;
+    --indigo-deep: #12162E;
+    --jade: #1F6E5C;
+    --jade-bg: #E3F1EA;
+    --gold: #B97A1F;
+    --gold-bg: #FBEFDA;
+    --amber: #B9701A;
+    --amber-bg: #FBEBD9;
+    --coral: #C43F30;
+    --coral-bg: #FBE7E3;
+    --line: rgba(25,26,34,0.09);
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(18,20,40,0.04), 0 10px 28px rgba(18,20,40,0.07);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Manrope', -apple-system, sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+    overscroll-behavior:none;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; font-weight:500; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit; -webkit-tap-highlight-color:transparent;}
+  img,svg{display:block;}
+  ::selection{background:var(--indigo); color:#fff;}
+  :focus-visible{ outline:2.5px solid var(--indigo); outline-offset:2px; border-radius:4px;}
+  .hidden{display:none !important;}
+
+  /* ---------- App shell / phone frame ---------- */
+  .device-wrap{
+    width:100%; min-height:100vh; display:flex; justify-content:center; align-items:stretch;
+  }
+  .device{
+    width:100%; max-width:560px; min-height:100vh; background:var(--bg);
+    display:flex; flex-direction:column; position:relative; overflow:hidden;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    padding:calc(14px + var(--safe-top)) 20px 12px; background:var(--bg);
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    border-bottom:1px solid var(--line); position:relative; z-index:5;
+  }
+  .topbar .title-block .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .topbar h1{font-size:21px; margin-top:2px;}
+  .topbar .logo-dot{width:8px; height:8px; border-radius:50%; background:var(--jade); display:inline-block; margin-right:7px; box-shadow:0 0 0 3px var(--jade-bg);}
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%; background:var(--bg-panel); border:none; display:flex;
+    align-items:center; justify-content:center; cursor:pointer; color:var(--indigo); flex-shrink:0;
+  }
+
+  /* ---------- Screens ---------- */
+  .screen{
+    flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:16px 16px calc(90px + var(--safe-bottom));
+  }
+  .screen.no-pad{padding:0;}
+
+  /* ---------- Bottom tab bar ---------- */
+  .tabbar{
+    position:absolute; left:0; right:0; bottom:0; background:rgba(250,250,247,0.92);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border-top:1px solid var(--line); display:flex; padding:8px 6px calc(8px + var(--safe-bottom));
+    z-index:20;
+  }
+  .tab-btn{
+    flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:6px 2px; cursor:pointer; color:var(--ink-faint); font-size:10.5px; font-weight:700;
+    border-radius:12px; transition:color .15s;
+  }
+  .tab-btn svg{width:22px; height:22px;}
+  .tab-btn.active{color:var(--indigo);}
+  .tab-btn:active{transform:scale(0.94);}
+
+  /* ---------- Cards & common ---------- */
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);}
+  .section-title{font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); margin:22px 2px 10px;}
+  .section-title:first-child{margin-top:2px;}
+
+  /* Home */
+  .greeting{margin-bottom:16px;}
+  .greeting .eyebrow{font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.07em; text-transform:uppercase; color:var(--ink-faint);}
+  .greeting h1{font-size:24px; margin-top:4px;}
+
+  .week-card{background:var(--indigo); color:#fff; border-radius:20px; padding:20px; position:relative; overflow:hidden;}
+  .week-card .pulse-deco{position:absolute; right:-10px; top:-6px; width:140px; height:80px; opacity:0.18;}
+  .week-row{display:flex; align-items:flex-end; justify-content:space-between; position:relative; z-index:1;}
+  .week-num{font-family:'Fraunces', serif; font-size:44px; font-weight:500; line-height:1;}
+  .week-num span{font-size:15px; font-family:'Manrope'; font-weight:600; opacity:0.7; margin-left:4px;}
+  .week-trim{font-size:12.5px; opacity:0.75; margin-top:4px;}
+  .stepper{display:flex; gap:8px;}
+  .step-btn{
+    width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.14); border:none; color:#fff;
+    font-size:18px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .step-btn:active{background:rgba(255,255,255,0.26);}
+  .progress-track{height:5px; border-radius:100px; background:rgba(255,255,255,0.16); margin-top:16px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--jade); border-radius:100px; transition:width .25s ease;}
+
+  .checkin-card{
+    display:flex; align-items:center; gap:14px; margin-top:12px; cursor:pointer; border:none; width:100%;
+    text-align:left; background:var(--card);
+  }
+  .checkin-card .ic{
+    width:44px; height:44px; border-radius:50%; background:var(--jade-bg); color:var(--jade); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .checkin-card b{font-size:15px; display:block;}
+  .checkin-card span{font-size:12.5px; color:var(--ink-soft);}
+  .checkin-card .arrow{margin-left:auto; color:var(--ink-faint);}
+
+  .tip-card{margin-top:12px;}
+  .tip-card .tag{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--jade); background:var(--jade-bg); padding:3px 9px; border-radius:100px; display:inline-block;
+  }
+  .tip-card p{margin-top:10px; font-size:14px; color:var(--ink); line-height:1.55;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;}
+  .quick-card{
+    padding:16px 14px; cursor:pointer; border:none; text-align:left; background:var(--card);
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .quick-card .ic{width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:10px;}
+  .quick-card b{font-size:13.5px;}
+  .quick-card span{font-size:11.5px; color:var(--ink-soft);}
+
+  .recent-row{
+    display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line);
+  }
+  .recent-row:last-child{border-bottom:none;}
+  .recent-row .chip-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .recent-row .txt{flex:1; min-width:0;}
+  .recent-row .txt b{font-size:13.5px; display:block;}
+  .recent-row .txt span{font-size:11.5px; color:var(--ink-faint);}
+  .recent-row .time{font-size:11px; color:var(--ink-faint); flex-shrink:0;}
+  .empty-note{font-size:13px; color:var(--ink-faint); padding:14px 2px;}
+
+  /* Chip severity colors reused across app */
+  .sev-emergency{background:var(--coral);} .sev-see-soon{background:var(--amber);}
+  .sev-monitor{background:var(--jade);} .sev-normal{background:var(--ink-faint);}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; font-weight:500;
+    padding:4px 9px; border-radius:100px;
+  }
+  .chip::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor;}
+  .chip.emergency{background:var(--coral-bg); color:var(--coral);}
+  .chip.see-soon{background:var(--amber-bg); color:var(--amber);}
+  .chip.monitor{background:var(--jade-bg); color:var(--jade);}
+  .chip.normal{background:var(--bg-panel); color:var(--ink-soft);}
+
+  /* FAB */
+  .fab{
+    position:absolute; right:16px; bottom:calc(88px + var(--safe-bottom)); z-index:15;
+    width:52px; height:52px; border-radius:50%; background:var(--coral); color:#fff; border:none;
+    box-shadow:0 10px 24px rgba(196,63,48,0.4); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .fab:active{transform:scale(0.94);}
+
+  /* ---------- Triage screen ---------- */
+  .triage-screen{display:flex; flex-direction:column; height:100%;}
+  .chat-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 16px; display:flex; flex-direction:column; gap:10px;}
+  .msg{max-width:82%; padding:11px 14px; border-radius:16px; font-size:14px; line-height:1.5;}
+  .msg.user{align-self:flex-end; background:var(--indigo); color:#fff; border-bottom-right-radius:5px;}
+  .msg.bot{align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:5px;}
+  .msg.bot .chip{margin-bottom:8px;}
+  .typing{align-self:flex-start; display:flex; align-items:center; gap:6px; padding:12px 14px;}
+  .typing span{width:6px; height:6px; border-radius:50%; background:var(--ink-faint); opacity:0.4; animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:0.25; transform:translateY(0);} 40%{opacity:0.9; transform:translateY(-2px);}}
+  .chips-row{display:flex; gap:8px; overflow-x:auto; padding:8px 16px; scrollbar-width:none; flex-shrink:0;}
+  .chips-row::-webkit-scrollbar{display:none;}
+  .sym-chip{
+    flex-shrink:0; font-size:12px; font-weight:600; color:var(--indigo); background:var(--bg-panel);
+    border:1px solid var(--line); padding:7px 12px; border-radius:100px; cursor:pointer; white-space:nowrap;
+  }
+  .chat-input-row{display:flex; gap:8px; padding:10px 16px calc(12px + var(--safe-bottom)); border-top:1px solid var(--line); flex-shrink:0; background:var(--bg);}
+  .chat-input-row input{
+    flex:1; border:1.5px solid var(--line); border-radius:100px; padding:11px 16px; font-size:14.5px;
+    font-family:inherit; background:var(--bg-panel); color:var(--ink); min-width:0;
+  }
+  .chat-input-row input:focus{outline:none; border-color:var(--indigo);}
+  .send-btn{
+    width:42px; height:42px; border-radius:50%; background:var(--indigo); border:none; color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .send-btn:disabled{opacity:0.4;}
+  .disclaimer-strip{font-size:10.5px; color:var(--ink-faint); text-align:center; padding:0 20px 8px; flex-shrink:0;}
+
+  /* ---------- Care screen ---------- */
+  .segmented{display:flex; background:var(--bg-panel); border-radius:100px; padding:4px; gap:2px; margin-bottom:18px;}
+  .seg-btn{flex:1; border:none; background:none; padding:9px 4px; border-radius:100px; font-size:12.5px; font-weight:700; color:var(--ink-soft); cursor:pointer;}
+  .seg-btn.active{background:var(--card); color:var(--indigo); box-shadow:var(--shadow);}
+
+  .accordion-item{border:1px solid var(--line); border-radius:16px; margin-bottom:10px; overflow:hidden; background:var(--card);}
+  .accordion-item.current{border-color:var(--jade);}
+  .acc-head{width:100%; display:flex; align-items:center; justify-content:space-between; padding:15px 16px; background:none; border:none; cursor:pointer; text-align:left;}
+  .acc-head .lt b{font-size:14.5px; display:block;}
+  .acc-head .lt span{font-size:11.5px; color:var(--ink-faint);}
+  .acc-head .now-badge{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--jade); background:var(--jade-bg); padding:3px 8px; border-radius:100px; margin-right:8px;}
+  .acc-head .chev{transition:transform .2s; color:var(--ink-faint); flex-shrink:0;}
+  .accordion-item.open .chev{transform:rotate(180deg);}
+  .acc-body{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+  .acc-body-inner{padding:0 16px 16px;}
+  .acc-sub{font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; margin:12px 0 6px;}
+  .acc-sub.ok{color:var(--jade);}
+  .acc-sub.warn{color:var(--coral);}
+  .acc-list{margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-soft); line-height:1.7;}
+  .acc-list li{margin-bottom:2px;}
+
+  .check-item{
+    display:flex; align-items:center; gap:12px; padding:13px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .check-item:last-child{border-bottom:none;}
+  .check-box{
+    width:22px; height:22px; border-radius:7px; border:2px solid var(--line); flex-shrink:0; display:flex;
+    align-items:center; justify-content:center; transition:background .15s, border-color .15s;
+  }
+  .check-item.done .check-box{background:var(--jade); border-color:var(--jade);}
+  .check-item.done span{color:var(--ink-faint); text-decoration:line-through;}
+  .check-item span{font-size:14px;}
+
+  .danger-box{background:var(--coral-bg); border-radius:16px; padding:16px; margin-top:8px;}
+  .danger-box .hd{display:flex; align-items:center; gap:8px; color:var(--coral); font-weight:800; font-size:13px; margin-bottom:8px;}
+  .danger-box ul{margin:0; padding-left:18px; font-size:13.5px; color:#8a2e23; line-height:1.7;}
+
+  .filter-row{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:14px; scrollbar-width:none;}
+  .filter-row::-webkit-scrollbar{display:none;}
+  .filter-chip{
+    flex-shrink:0; font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:100px; border:1.5px solid var(--line);
+    background:var(--card); color:var(--ink-soft); cursor:pointer;
+  }
+  .filter-chip.active{background:var(--indigo); border-color:var(--indigo); color:#fff;}
+  .food-card{display:flex; gap:12px; align-items:center; padding:14px; margin-bottom:10px;}
+  .food-card .ic2{width:40px; height:40px; border-radius:12px; background:var(--gold-bg); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;}
+  .food-card b{font-size:14.5px; display:block;}
+  .food-card p{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .food-card .tags{display:flex; gap:4px; margin-top:6px; flex-wrap:wrap;}
+  .food-card .mini-tag{font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-faint); background:var(--bg-panel); padding:2px 6px; border-radius:100px;}
+
+  /* History */
+  .hist-card{display:flex; gap:12px; padding:14px; margin-bottom:10px;}
+  .hist-card .dot{width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0;}
+  .hist-card b{font-size:13.5px;}
+  .hist-card p{font-size:12.5px; color:var(--ink-soft); margin-top:3px; line-height:1.5;}
+  .hist-card .time{font-size:11px; color:var(--ink-faint); margin-top:5px; display:block;}
+  .clear-btn{width:100%; padding:13px; border-radius:100px; border:1.5px solid var(--line); background:none; color:var(--ink-soft); font-weight:700; font-size:13px; margin-top:6px; cursor:pointer;}
+
+  /* Modal */
+  .modal-backdrop{
+    position:absolute; inset:0; background:rgba(18,20,40,0.5); z-index:50; display:flex; align-items:flex-end;
+  }
+  .modal-sheet{
+    background:var(--bg); width:100%; border-radius:24px 24px 0 0; padding:22px 20px calc(24px + var(--safe-bottom));
+    max-height:80%; overflow-y:auto;
+  }
+  .modal-sheet h2{font-size:19px; color:var(--coral); display:flex; align-items:center; gap:8px;}
+  .modal-sheet .lead{font-size:13.5px; color:var(--ink-soft); margin-top:8px;}
+  .modal-sheet ul{margin:16px 0; padding-left:20px; font-size:14px; line-height:1.8;}
+  .modal-actions{display:flex; gap:10px; margin-top:8px;}
+  .btn{font-weight:700; font-size:14px; border-radius:100px; border:none; cursor:pointer; padding:13px 18px; flex:1; text-align:center;}
+  .btn-coral{background:var(--coral); color:#fff;}
+  .btn-line{background:none; border:1.5px solid var(--line); color:var(--ink);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+</style>
+</head>
+<body>
+<div class="device-wrap">
+<div class="device" id="device">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="title-block">
+      <div class="eyebrow"><span class="logo-dot"></span>ALAAFIA</div>
+      <h1 id="screenTitle">Home</h1>
+    </div>
+    <button class="icon-btn" id="topEmergencyBtn" aria-label="Emergency signs">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 21h20L12 3z" stroke="#C43F30" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4" stroke="#C43F30" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#C43F30"/></svg>
+    </button>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div class="screen" id="screen-home">
+    <div class="week-card">
+      <svg class="pulse-deco" viewBox="0 0 140 80" fill="none"><path d="M0,40 L40,40 L48,14 L58,66 L68,10 L78,40 L140,40" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="week-row">
+        <div>
+          <div class="week-num" id="weekNumDisplay">24<span>weeks</span></div>
+          <div class="week-trim" id="weekTrimDisplay">Second trimester</div>
+        </div>
+        <div class="stepper">
+          <button class="step-btn" id="weekMinus" aria-label="Decrease week">−</button>
+          <button class="step-btn" id="weekPlus" aria-label="Increase week">+</button>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="weekProgress" style="width:60%"></div></div>
+    </div>
+
+    <button class="card checkin-card" id="goTriageFromHome">
+      <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-7 4 14 2-7h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><b>How are you feeling?</b><span>Start a triage check-in</span></div>
+      <svg class="arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <div class="card tip-card">
+      <span class="tag" id="tipTag">Today's guidance</span>
+      <p id="tipText">Loading tip…</p>
+    </div>
+
+    <div class="section-title">Quick access</div>
+    <div class="grid-2">
+      <button class="card quick-card" data-goto="care" data-subtab="pregnancy">
+        <div class="ic" style="background:var(--jade-bg); color:var(--jade);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg></div>
+        <b>Pregnancy guide</b><span>By trimester</span>
+      </button>
+      <button class="card quick-card" data-goto="care" data-subtab="newborn">
+        <div class="ic" style="background:var(--coral-bg); color:var(--coral);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.5-7-10a4 4 0 018 0 4 4 0 018 0c0 5.5-9 10-9 10z" stroke="currentColor" stroke-width="2"/></svg></div>
+        <b>Newborn care</b><span>Daily checklist</span>
+      </button>
+      <button class="card quick-card" data-goto="care" data-subtab="nutrition">
+        <div class="ic" style="background:var(--gold-bg); color:var(--gold);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3c-4 4-7 8-7 12a7 7 0 0014 0c0-4-3-8-7-12z" stroke="currentColor" stroke-width="2"/></svg></div>
+        <b>Nutrition</b><span>What to eat</span>
+      </button>
+      <button class="card quick-card" id="homeHistoryBtn">
+        <div class="ic" style="background:var(--bg-panel); color:var(--indigo);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 4v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <b>Check history</b><span id="homeHistoryCount">No checks yet</span>
+      </button>
+    </div>
+
+    <div class="section-title">Recent checks</div>
+    <div class="card" id="homeRecentList" style="padding:6px 14px;">
+      <p class="empty-note">Your triage check-ins will show up here.</p>
+    </div>
+  </div>
+
+  <!-- TRIAGE SCREEN -->
+  <div class="screen no-pad triage-screen hidden" id="screen-triage">
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chips-row" id="chipsRow">
+      <button class="sym-chip" data-text="I've had heavy vaginal bleeding since this morning.">Heavy bleeding</button>
+      <button class="sym-chip" data-text="I have a severe headache and my vision keeps blurring.">Severe headache + blurry vision</button>
+      <button class="sym-chip" data-text="My baby hasn't moved much at all today.">Baby not moving</button>
+      <button class="sym-chip" data-text="I have mild swelling in my ankles by evening.">Mild ankle swelling</button>
+      <button class="sym-chip" data-text="I feel nauseous most mornings.">Morning nausea</button>
+      <button class="sym-chip" data-text="I have a fever of 38.5 and chills, 3 days after delivery.">Fever after delivery</button>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Describe a symptom…" maxlength="240">
+      <button class="send-btn" id="sendBtn" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" fill="white"/></svg>
+      </button>
+    </div>
+    <p class="disclaimer-strip">Prototype demo — not a substitute for professional care.</p>
+  </div>
+
+  <!-- CARE SCREEN -->
+  <div class="screen hidden" id="screen-care">
+    <div class="segmented">
+      <button class="seg-btn active" data-sub="pregnancy">Pregnancy</button>
+      <button class="seg-btn" data-sub="newborn">Newborn</button>
+      <button class="seg-btn" data-sub="nutrition">Nutrition</button>
+    </div>
+
+    <div id="sub-pregnancy"></div>
+
+    <div id="sub-newborn" class="hidden">
+      <div class="section-title">Daily care checklist</div>
+      <div class="card" id="newbornChecklistWrap" style="padding:4px 14px;"></div>
+      <div class="section-title">Watch for danger signs</div>
+      <div class="danger-box">
+        <div class="hd">⚠ Seek care immediately if you see</div>
+        <ul>
+          <li>Yellowing of skin or eyes (jaundice) that's spreading or deepening</li>
+          <li>Fever, or the baby feels unusually cold</li>
+          <li>Difficulty breathing or fast, grunting breaths</li>
+          <li>Refusing to feed, or no wet nappies for 6+ hours</li>
+          <li>Unusual limpness, or a bulging soft spot</li>
+          <li>Redness, swelling, or discharge from the cord stump</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="sub-nutrition" class="hidden">
+      <div class="filter-row" id="nutritionFilters">
+        <button class="filter-chip active" data-tag="all">All</button>
+        <button class="filter-chip" data-tag="iron">Iron</button>
+        <button class="filter-chip" data-tag="folate">Folate</button>
+        <button class="filter-chip" data-tag="protein">Protein</button>
+        <button class="filter-chip" data-tag="calcium">Calcium</button>
+      </div>
+      <div id="foodList"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY SCREEN -->
+  <div class="screen hidden" id="screen-history">
+    <div class="section-title">All check-ins</div>
+    <div id="historyList"><p class="empty-note">No check-ins yet — anything you check in the Triage tab will be logged here.</p></div>
+  </div>
+
+  <!-- EMERGENCY MODAL -->
+  <div class="modal-backdrop hidden" id="emergencyModal">
+    <div class="modal-sheet">
+      <h2>⚠ Go to a hospital now if you have any of these</h2>
+      <p class="lead">These are signs of a possible emergency — don't wait to see if they pass.</p>
+      <ul id="emergencyList"></ul>
+      <div class="modal-actions">
+        <button class="btn btn-line" id="closeEmergencyModal">Close</button>
+        <button class="btn btn-coral" id="startTriageFromModal">Start triage</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fabEmergency" aria-label="Emergency signs">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3L2 21h20L12 3z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#fff"/></svg>
+  </button>
+
+  <!-- TAB BAR -->
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 11l9-8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10h14V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Home
+    </button>
+    <button class="tab-btn" data-tab="triage">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-7 4 14 2-7h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Triage
+    </button>
+    <button class="tab-btn" data-tab="care">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.5-7-10.5A4.5 4.5 0 0112 6a4.5 4.5 0 019 4.5C21 16.5 12 21 12 21z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Care
+    </button>
+    <button class="tab-btn" data-tab="history">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 4v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 8v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      History
+    </button>
+  </div>
+
+</div>
+</div>
+
+<script>
+(function(){
+  /* ============ STATE ============ */
+  const state = {
+    week: 24,
+    tab: 'home',
+    careSub: 'pregnancy',
+    nutritionFilter: 'all',
+    triageHistory: [],
+    chatHistory: [],
+    newbornChecks: {}
+  };
+
+  /* ============ DATA ============ */
+  const trimesters = [
+    {
+      key:'first', name:'First trimester', weeks:'Weeks 1–13',
+      range:[1,13],
+      normal:['Mild nausea or morning sickness','Tiredness and needing more sleep','Tender or swollen breasts','Light spotting around implantation'],
+      warning:['Heavy bleeding or clotting','Severe cramping or one-sided pain','Fever above 38°C','Severe vomiting, unable to keep fluids down']
+    },
+    {
+      key:'second', name:'Second trimester', weeks:'Weeks 14–27',
+      range:[14,27],
+      normal:['Growing belly and visible bump','Mild backache','First flutters of movement (16–22 weeks)','Occasional round ligament pulling pain'],
+      warning:['No felt movement by 22–24 weeks','Severe or persistent headache with vision changes','Sudden swelling of face or hands','Regular tightening or contractions']
+    },
+    {
+      key:'third', name:'Third trimester', weeks:'Weeks 28–40',
+      range:[28,42],
+      normal:['Braxton Hicks (irregular, painless tightening)','Increased tiredness and shortness of breath','Difficulty sleeping','Frequent urge to urinate'],
+      warning:['Reduced or no fetal movement','Heavy bleeding or fluid leaking','Severe abdominal pain','Severe headache, blurred vision, or sudden swelling']
+    }
+  ];
+
+  const tipsByTrimester = {
+    first:'Folate-rich foods matter most right now — beans, groundnuts, and dark leafy greens like ugu support early development.',
+    second:'This is a good time to start noticing your baby\'s movement pattern, so you\'ll recognize if it changes later.',
+    third:'Keep track of fetal movement daily. A noticeable drop is one of the clearest signs worth checking on right away.'
+  };
+
+  const newbornDaily = [
+    {id:'feed', label:'Fed on demand (8–12 times today)'},
+    {id:'warm', label:'Kept warm — skin-to-skin when possible'},
+    {id:'cord', label:'Cord stump kept clean and dry'},
+    {id:'wet', label:'At least 6 wet nappies today'},
+    {id:'sleep', label:'Sleeping on their back'},
+    {id:'jaundice', label:'Checked skin and eyes for yellowing'}
+  ];
+
+  const foods = [
+    {name:'Ugu (fluted pumpkin leaf)', why:'Rich in iron and folate — supports blood volume and neural development.', tags:['iron','folate'], emoji:'🥬'},
+    {name:'Beans & black-eyed peas', why:'A strong plant protein and iron source, easy to prepare daily.', tags:['protein','iron'], emoji:'🫘'},
+    {name:'Groundnuts (peanuts)', why:'Good plant protein and healthy fats, easy to snack on.', tags:['protein'], emoji:'🥜'},
+    {name:'Crayfish', why:'Concentrated protein and calcium, common in soups.', tags:['protein','calcium'], emoji:'🦐'},
+    {name:'Moringa leaves', why:'High in iron, calcium, and vitamins — a strong local superfood.', tags:['iron','calcium','folate'], emoji:'🌿'},
+    {name:'Liver (in moderation)', why:'One of the richest iron sources — a few times a week is plenty.', tags:['iron'], emoji:'🍖'},
+    {name:'Milk or soy milk', why:'Supports calcium needs for your bones and the baby\'s.', tags:['calcium'], emoji:'🥛'},
+    {name:'Oranges & citrus', why:'Vitamin C helps your body absorb iron from plant foods.', tags:['iron'], emoji:'🍊'},
+    {name:'Titus fish', why:'Protein and omega-3s that support the baby\'s brain development.', tags:['protein'], emoji:'🐟'},
+    {name:'Watermelon', why:'Hydration and light nutrients — helpful against swelling and heat.', tags:['folate'], emoji:'🍉'}
+  ];
+
+  const emergencySigns = [
+    'Heavy or soaking vaginal bleeding',
+    'Severe or sudden headache with blurred vision',
+    'Severe abdominal pain that doesn\'t ease',
+    'Reduced or no fetal movement',
+    'High fever with chills or shaking',
+    'Convulsions or fits',
+    'Fainting or severe difficulty breathing'
+  ];
+
+  const SYSTEM_PROMPT = "You are the triage assistant inside \"Alaafia\", a maternal-health app for pregnant and postpartum women in Nigeria. A user describes a physical symptom or concern in one or two sentences.\n\nRespond in warm, plain, conversational language (2-4 short sentences, no medical jargon, no lists). Start your reply with exactly one tag on its own line, nothing else on that line: [EMERGENCY], [SEE-SOON], [MONITOR], or [NORMAL].\n\nUse [EMERGENCY] for red-flag signs: heavy or soaking vaginal bleeding, severe or sudden headache with vision changes, severe abdominal pain, reduced or absent fetal movement, high fever with chills or shaking, convulsions or fits, fainting, difficulty breathing, or thoughts of self-harm.\nUse [SEE-SOON] for concerning but not immediately life-threatening signs that need a clinician within a day or so.\nUse [MONITOR] for common discomforts worth watching at home (mild swelling, mild nausea, occasional cramping).\nUse [NORMAL] for clearly typical pregnancy experiences needing no action.\n\nAfter the tag, write the message itself. For EMERGENCY or SEE-SOON, always end by clearly telling her to get to a hospital or clinic now (or soon) — do not soften this. Never name specific medications or dosages. Never claim certainty — you are a first read, not a diagnosis. This is a prototype for an academic project; keep that in mind but do not mention it unless asked.";
+
+  /* ============ HELPERS ============ */
+  function trimesterForWeek(w){
+    if(w<=13) return trimesters[0];
+    if(w<=27) return trimesters[1];
+    return trimesters[2];
+  }
+  function fmtTime(d){
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  const SEV_META = {
+    EMERGENCY:{cls:'emergency', dot:'sev-emergency', label:'Go now'},
+    'SEE-SOON':{cls:'see-soon', dot:'sev-see-soon', label:'See someone soon'},
+    MONITOR:{cls:'monitor', dot:'sev-monitor', label:'Monitor at home'},
+    NORMAL:{cls:'normal', dot:'sev-normal', label:'Sounds normal'}
+  };
+
+  /* ============ NAVIGATION ============ */
+  const titles = {home:'Home', triage:'Triage', care:'Care guide', history:'History'};
+  function goTab(tab, opts){
+    opts = opts || {};
+    state.tab = tab;
+    document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+    document.getElementById('screen-'+tab).classList.remove('hidden');
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+    document.getElementById('screenTitle').textContent = titles[tab];
+    if(tab==='care' && opts.subtab) setCareSub(opts.subtab);
+    if(tab==='triage'){ setTimeout(()=>document.getElementById('chatInput').focus(), 250); }
+  }
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>goTab(btn.dataset.tab));
+  });
+  document.querySelectorAll('[data-goto]').forEach(btn=>{
+    btn.addEventListener('click', ()=>goTab(btn.dataset.goto, {subtab:btn.dataset.subtab}));
+  });
+  document.getElementById('goTriageFromHome').addEventListener('click', ()=>goTab('triage'));
+  document.getElementById('homeHistoryBtn').addEventListener('click', ()=>goTab('history'));
+
+  /* ============ HOME: week stepper ============ */
+  function renderHome(){
+    const t = trimesterForWeek(state.week);
+    document.getElementById('weekNumDisplay').innerHTML = state.week + '<span>weeks</span>';
+    document.getElementById('weekTrimDisplay').textContent = t.name;
+    document.getElementById('weekProgress').style.width = Math.min(100, Math.round((state.week/40)*100)) + '%';
+    document.getElementById('tipTag').textContent = t.name + ' tip';
+    document.getElementById('tipText').textContent = tipsByTrimester[t.key];
+    renderHomeRecent();
+  }
+  document.getElementById('weekMinus').addEventListener('click', ()=>{ state.week = Math.max(1, state.week-1); renderHome(); renderPregnancy(); });
+  document.getElementById('weekPlus').addEventListener('click', ()=>{ state.week = Math.min(42, state.week+1); renderHome(); renderPregnancy(); });
+
+  function renderHomeRecent(){
+    const wrap = document.getElementById('homeRecentList');
+    const countEl = document.getElementById('homeHistoryCount');
+    if(state.triageHistory.length===0){
+      wrap.innerHTML = '<p class="empty-note">Your triage check-ins will show up here.</p>';
+      countEl.textContent = 'No checks yet';
+      return;
+    }
+    countEl.textContent = state.triageHistory.length + ' logged';
+    wrap.innerHTML = state.triageHistory.slice(0,3).map(entry=>{
+      const meta = SEV_META[entry.severity] || SEV_META.NORMAL;
+      return '<div class="recent-row"><div class="chip-dot '+meta.dot+'"></div><div class="txt"><b>'+meta.label+'</b><span>'+escapeHtml(entry.summary)+'</span></div><div class="time">'+fmtTime(entry.time)+'</div></div>';
+    }).join('');
+  }
+
+  function escapeHtml(s){
+    const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+  }
+
+  /* ============ EMERGENCY MODAL ============ */
+  document.getElementById('emergencyList').innerHTML = emergencySigns.map(s=>'<li>'+s+'</li>').join('');
+  function openEmergencyModal(){ document.getElementById('emergencyModal').classList.remove('hidden'); }
+  function closeEmergencyModal(){ document.getElementById('emergencyModal').classList.add('hidden'); }
+  document.getElementById('topEmergencyBtn').addEventListener('click', openEmergencyModal);
+  document.getElementById('fabEmergency').addEventListener('click', openEmergencyModal);
+  document.getElementById('closeEmergencyModal').addEventListener('click', closeEmergencyModal);
+  document.getElementById('emergencyModal').addEventListener('click', (e)=>{ if(e.target.id==='emergencyModal') closeEmergencyModal(); });
+  document.getElementById('startTriageFromModal').addEventListener('click', ()=>{ closeEmergencyModal(); goTab('triage'); });
+
+  /* ============ CARE SCREEN ============ */
+  document.querySelectorAll('.seg-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>setCareSub(btn.dataset.sub));
+  });
+  function setCareSub(sub){
+    state.careSub = sub;
+    document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.sub===sub));
+    ['pregnancy','newborn','nutrition'].forEach(s=>{
+      document.getElementById('sub-'+s).classList.toggle('hidden', s!==sub);
+    });
+  }
+
+  function renderPregnancy(){
+    const current = trimesterForWeek(state.week);
+    const wrap = document.getElementById('sub-pregnancy');
+    wrap.innerHTML = trimesters.map(t=>{
+      const isCurrent = t.key===current.key;
+      return '<div class="accordion-item'+(isCurrent?' current':'')+'" data-key="'+t.key+'">'
+        + '<button class="acc-head">'
+          + '<div class="lt"><b>'+t.name+'</b><span>'+t.weeks+'</span></div>'
+          + (isCurrent?'<span class="now-badge">Now</span>':'')
+          + '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        + '</button>'
+        + '<div class="acc-body"><div class="acc-body-inner">'
+          + '<div class="acc-sub ok">Usually normal</div><ul class="acc-list">'+t.normal.map(x=>'<li>'+x+'</li>').join('')+'</ul>'
+          + '<div class="acc-sub warn">Get checked if you notice</div><ul class="acc-list">'+t.warning.map(x=>'<li>'+x+'</li>').join('')+'</ul>'
+        + '</div></div>'
+      + '</div>';
+    }).join('');
+    wrap.querySelectorAll('.accordion-item').forEach(item=>{
+      const head = item.querySelector('.acc-head');
+      const body = item.querySelector('.acc-body');
+      if(item.dataset.key===current.key){
+        item.classList.add('open');
+        requestAnimationFrame(()=>{ body.style.maxHeight = body.scrollHeight+'px'; });
+      }
+      head.addEventListener('click', ()=>{
+        const isOpen = item.classList.contains('open');
+        wrap.querySelectorAll('.accordion-item').forEach(other=>{
+          other.classList.remove('open');
+          other.querySelector('.acc-body').style.maxHeight = 0;
+        });
+        if(!isOpen){
+          item.classList.add('open');
+          body.style.maxHeight = body.scrollHeight+'px';
+        }
+      });
+    });
+  }
+
+  function renderNewborn(){
+    const wrap = document.getElementById('newbornChecklistWrap');
+    wrap.innerHTML = newbornDaily.map(item=>{
+      const done = !!state.newbornChecks[item.id];
+      return '<div class="check-item'+(done?' done':'')+'" data-id="'+item.id+'"><div class="check-box">'
+        + (done? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '')
+        + '</div><span>'+item.label+'</span></div>';
+    }).join('');
+    wrap.querySelectorAll('.check-item').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const id = el.dataset.id;
+        state.newbornChecks[id] = !state.newbornChecks[id];
+        renderNewborn();
+      });
+    });
+  }
+
+  document.querySelectorAll('#nutritionFilters .filter-chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.nutritionFilter = btn.dataset.tag;
+      document.querySelectorAll('#nutritionFilters .filter-chip').forEach(b=>b.classList.toggle('active', b===btn));
+      renderFoods();
+    });
+  });
+  function renderFoods(){
+    const list = document.getElementById('foodList');
+    const filtered = state.nutritionFilter==='all' ? foods : foods.filter(f=>f.tags.includes(state.nutritionFilter));
+    list.innerHTML = filtered.map(f=>{
+      return '<div class="card food-card"><div class="ic2">'+f.emoji+'</div><div><b>'+f.name+'</b><p>'+f.why+'</p><div class="tags">'+f.tags.map(t=>'<span class="mini-tag">'+t+'</span>').join('')+'</div></div></div>';
+    }).join('');
+  }
+
+  /* ============ HISTORY SCREEN ============ */
+  function renderHistory(){
+    const wrap = document.getElementById('historyList');
+    if(state.triageHistory.length===0){
+      wrap.innerHTML = '<p class="empty-note">No check-ins yet — anything you check in the Triage tab will be logged here.</p>';
+      return;
+    }
+    wrap.innerHTML = state.triageHistory.map(entry=>{
+      const meta = SEV_META[entry.severity] || SEV_META.NORMAL;
+      return '<div class="card hist-card"><div class="dot '+meta.dot+'"></div><div><b>'+meta.label+'</b><p>'+escapeHtml(entry.summary)+'</p><span class="time">'+entry.time.toLocaleDateString()+' · '+fmtTime(entry.time)+'</span></div></div>';
+    }).join('') + '<button class="clear-btn" id="clearHistoryBtn">Clear history</button>';
+    document.getElementById('clearHistoryBtn').addEventListener('click', ()=>{
+      state.triageHistory = [];
+      renderHistory(); renderHomeRecent();
+    });
+  }
+
+  /* ============ TRIAGE CHAT ============ */
+  const chatBody = document.getElementById('chatBody');
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  let busy = false;
+
+  function scrollChatBottom(){ chatBody.scrollTop = chatBody.scrollHeight; }
+
+  function addUserMsg(text){
+    const el = document.createElement('div');
+    el.className = 'msg user';
+    el.textContent = text;
+    chatBody.appendChild(el);
+    scrollChatBottom();
+  }
+
+  function addBotMsg(rawText, userText){
+    const match = rawText.match(/^\s*\[(EMERGENCY|SEE-SOON|MONITOR|NORMAL)\]\s*/i);
+    let tag = null, body = rawText;
+    if(match){ tag = match[1].toUpperCase(); body = rawText.slice(match[0].length).trim(); }
+    const el = document.createElement('div');
+    el.className = 'msg bot';
+    if(tag){
+      const meta = SEV_META[tag];
+      const chip = document.createElement('span');
+      chip.className = 'chip ' + meta.cls;
+      chip.textContent = meta.label;
+      el.appendChild(chip);
+      el.appendChild(document.createElement('br'));
+    }
+    el.appendChild(document.createTextNode(body));
+    chatBody.appendChild(el);
+    scrollChatBottom();
+    if(tag && userText){
+      state.triageHistory.unshift({time:new Date(), severity:tag, summary:userText});
+      renderHomeRecent();
+      renderHistory();
+    }
+  }
+
+  function addTyping(){
+    const el = document.createElement('div');
+    el.className = 'msg bot typing';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    chatBody.appendChild(el);
+    scrollChatBottom();
+    return el;
+  }
+
+  async function sendMessage(text){
+    if(!text || busy) return;
+    busy = true;
+    sendBtn.disabled = true;
+    addUserMsg(text);
+    state.chatHistory.push({role:'user', content:text});
+    input.value = '';
+    const typingEl = addTyping();
+    try{
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model:"claude-sonnet-4-6",
+          max_tokens:300,
+          system: SYSTEM_PROMPT,
+          messages: state.chatHistory
+        })
+      });
+      const data = await response.json();
+      const textOut = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+      typingEl.remove();
+      if(!textOut){
+        addBotMsg('[SEE-SOON] Something went wrong reading that response. If you\'re worried right now, please contact a clinic or hospital directly.', text);
+      } else {
+        addBotMsg(textOut, text);
+        state.chatHistory.push({role:'assistant', content:textOut});
+      }
+    } catch(err){
+      typingEl.remove();
+      addBotMsg('[SEE-SOON] I couldn\'t reach the triage service just now. If you\'re at all worried, please contact a clinic or hospital directly rather than waiting.', text);
+    } finally {
+      busy = false;
+      sendBtn.disabled = false;
+    }
+  }
+
+  sendBtn.addEventListener('click', ()=>sendMessage(input.value.trim()));
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(input.value.trim()); });
+  document.getElementById('chipsRow').addEventListener('click', (e)=>{
+    const chip = e.target.closest('.sym-chip');
+    if(chip) sendMessage(chip.dataset.text);
+  });
+
+  /* ============ INIT ============ */
+  renderHome();
+  renderPregnancy();
+  renderNewborn();
+  renderFoods();
+  renderHistory();
+  addBotMsg("[NORMAL] Hi — I'm here to help you get a quick, honest read on a symptom, day or night. Tell me what's going on, or tap one of the examples below.");
+})();
+</script>
+</body>
+</html>
