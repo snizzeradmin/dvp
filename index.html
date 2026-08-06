@@ -10,6 +10,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         *,
         *::before,
@@ -580,6 +581,16 @@
         .scanner-actions .btn {
             font-size: 14px;
             padding: 10px 16px;
+        }
+
+        #reader video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #reader {
+            overflow: hidden;
         }
 
         .manual-section {
@@ -1307,24 +1318,22 @@
             <div class="screen-body">
                 <div class="scanner-wrap">
                     <div class="scanner-viewfinder" id="viewfinder">
-                        <div class="scanner-corners">
+                        <div id="reader" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;"></div>
+                        <div class="scanner-corners" style="z-index: 2;">
                             <div class="sc-inner"></div>
                         </div>
-                        <div class="scan-line" id="scan-line"></div>
-                        <div class="scanner-status scan-pulse" id="scanner-status">Align QR code within frame</div>
+                        <div class="scan-line" id="scan-line" style="z-index: 2;"></div>
+                        <div class="scanner-status scan-pulse" id="scanner-status" style="z-index: 2;">Align QR code within frame</div>
                     </div>
                     <div class="scanner-actions">
-                        <button class="btn btn-primary" onclick="simulateScan()" style="flex:1">
+                        <button class="btn btn-primary" onclick="toggleScanner()" style="flex:1" id="scan-btn">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
                                 stroke-linecap="round">
                                 <rect x="3" y="3" width="7" height="7" rx="1" />
                                 <rect x="14" y="3" width="7" height="7" rx="1" />
                                 <rect x="3" y="14" width="7" height="7" rx="1" />
                                 <circle cx="17.5" cy="17.5" r="2.5" /></svg>
-                            Simulate Scan
-                        </button>
-                        <button class="btn btn-secondary" onclick="simulateFakeScan()" style="flex:1">
-                            Scan Fake
+                            <span id="scan-btn-text">Start Scanner</span>
                         </button>
                     </div>
                 </div>
@@ -1376,7 +1385,7 @@
                     <div class="topbar-title">Drug Registry</div>
                     <div class="topbar-sub">NAFDAC Registered</div>
                 </div>
-                <div class="badge badge-blue" style="font-size:11px">14,892</div>
+                <div class="badge badge-blue" style="font-size:11px" id="db-count">14,892</div>
             </div>
             <div class="screen-body">
                 <div class="search-bar">
@@ -1542,22 +1551,22 @@
                     <div class="stat-grid" style="margin-bottom:16px">
                         <div class="stat-card">
                             <div class="stat-label">Total Scans</div>
-                            <div class="stat-value">47,312</div>
+                            <div class="stat-value" id="stat-total-scans">47,312</div>
                             <div class="stat-sub">↑ 12% this week</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Fakes Caught</div>
-                            <div class="stat-value" style="color:var(--red)">1,842</div>
-                            <div class="stat-sub">3.9% of scans</div>
+                            <div class="stat-value" style="color:var(--red)" id="stat-fakes">1,842</div>
+                            <div class="stat-sub" id="stat-fakes-percent">3.9% of scans</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Reports Filed</div>
-                            <div class="stat-value">284</div>
+                            <div class="stat-value" id="stat-reports">284</div>
                             <div class="stat-sub">This month</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Drugs in DB</div>
-                            <div class="stat-value">14,892</div>
+                            <div class="stat-value" id="stat-db">14,892</div>
                             <div class="stat-sub">Active registrations</div>
                         </div>
                     </div>
@@ -1856,6 +1865,39 @@
         let currentFilter = 'all';
         let recentScans = JSON.parse(localStorage.getItem('recentScans') || '[]');
         let reportCount = parseInt(localStorage.getItem('reportCount') || '0');
+        let totalScans = parseInt(localStorage.getItem('totalScans') || '0');
+        let fakesCaught = parseInt(localStorage.getItem('fakesCaught') || '0');
+
+        function updateStats() {
+            const drugsCount = DRUGS.length.toLocaleString();
+            const elHeroCount = document.getElementById('hero-count');
+            const elHeroScans = document.getElementById('hero-scans');
+            if (elHeroCount) elHeroCount.textContent = drugsCount;
+            if (elHeroScans) elHeroScans.textContent = totalScans.toLocaleString();
+            
+            const dbCountBadge = document.getElementById('db-count');
+            if (dbCountBadge) dbCountBadge.textContent = drugsCount;
+            
+            const statTotalScans = document.getElementById('stat-total-scans');
+            const statFakes = document.getElementById('stat-fakes');
+            const statReports = document.getElementById('stat-reports');
+            const statDb = document.getElementById('stat-db');
+            const statFakesPercent = document.getElementById('stat-fakes-percent');
+            
+            if (statTotalScans) statTotalScans.textContent = totalScans.toLocaleString();
+            if (statFakes) statFakes.textContent = fakesCaught.toLocaleString();
+            if (statReports) statReports.textContent = reportCount.toLocaleString();
+            if (statDb) statDb.textContent = drugsCount;
+            
+            if (statFakesPercent) {
+                if (totalScans === 0) {
+                    statFakesPercent.textContent = '0% of scans';
+                } else {
+                    const percent = ((fakesCaught / totalScans) * 100).toFixed(1);
+                    statFakesPercent.textContent = percent + '% of scans';
+                }
+            }
+        }
 
         function navigate(screen) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1866,28 +1908,74 @@
             if (screen === 'analytics') renderSparkline();
         }
 
-        function simulateScan() {
-            const genuine = DRUGS[Math.floor(Math.random() * DRUGS.length)];
-            showScanningAnimation(() => showResultSheet('authentic', genuine.name, genuine.id));
+        let html5QrCode = null;
+
+        function toggleScanner() {
+            if (html5QrCode) {
+                stopScanner();
+            } else {
+                startScanner();
+            }
         }
 
-        function simulateFakeScan() {
-            showScanningAnimation(() => showResultSheet('fake', 'Unknown Drug', 'B3-0041-FKE'));
-        }
-
-        function showScanningAnimation(callback) {
+        function startScanner() {
             const status = document.getElementById('scanner-status');
-            const line = document.getElementById('scan-line');
-            status.textContent = 'Scanning...';
-            line.style.animationDuration = '0.4s';
-            setTimeout(() => {
-                status.textContent = 'Verifying with NAFDAC...';
-                setTimeout(() => {
-                    line.style.animationDuration = '2s';
+            const btnText = document.getElementById('scan-btn-text');
+            
+            status.textContent = 'Starting camera...';
+            html5QrCode = new Html5Qrcode("reader");
+            
+            html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText, decodedResult) => {
+                    stopScanner();
+                    status.textContent = 'Verifying with NAFDAC...';
+                    setTimeout(() => {
+                        processScannedCode(decodedText);
+                        status.textContent = 'Align QR code within frame';
+                    }, 800);
+                },
+                (errorMessage) => {
+                    // ignore error as it scans continuously
+                }
+            ).then(() => {
+                btnText.textContent = 'Stop Scanner';
+                status.textContent = 'Align QR code within frame';
+            }).catch((err) => {
+                showToast("Error starting camera");
+                status.textContent = 'Camera error';
+                html5QrCode = null;
+            });
+        }
+
+        function stopScanner() {
+            const status = document.getElementById('scanner-status');
+            const btnText = document.getElementById('scan-btn-text');
+            
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    html5QrCode = null;
+                    btnText.textContent = 'Start Scanner';
                     status.textContent = 'Align QR code within frame';
-                    callback();
-                }, 800);
-            }, 600);
+                }).catch(err => {
+                    console.log("Error stopping scanner", err);
+                });
+            }
+        }
+
+        function processScannedCode(val) {
+            val = val.trim().toUpperCase();
+            const drug = DRUGS.find(d => d.id === val);
+            if (drug) {
+                showResultSheet(drug.status === 'suspended' ? 'unknown' : 'authentic', drug.name, drug.id);
+            } else {
+                showResultSheet('fake', 'Unknown Drug', val);
+            }
         }
 
         function fillDemo(code) {
@@ -1922,9 +2010,19 @@
             };
             recentScans.unshift(scan);
             recentScans = recentScans.slice(0, 10);
+            
+            totalScans++;
+            if (type === 'fake') {
+                fakesCaught++;
+            }
+            
             try {
                 localStorage.setItem('recentScans', JSON.stringify(recentScans));
+                localStorage.setItem('totalScans', totalScans);
+                localStorage.setItem('fakesCaught', fakesCaught);
             } catch (e) {}
+            
+            updateStats();
 
             let iconHtml, statusBadge, statusMsg;
             if (type === 'authentic') {
@@ -2078,6 +2176,8 @@
             try {
                 localStorage.setItem('reportCount', reportCount);
             } catch (e) {}
+            
+            updateStats();
 
             const ref = 'NF-' + Date.now().toString().slice(-6) + '-' + Math.random().toString(36).slice(2, 5)
                 .toUpperCase();
@@ -2169,6 +2269,7 @@
         }
 
         renderSparkline();
+        updateStats();
         if (reportCount > 0) {
             const badge = document.getElementById('report-badge');
             badge.style.display = 'block';
